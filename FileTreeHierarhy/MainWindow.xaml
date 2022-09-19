@@ -1,0 +1,16 @@
+﻿<Window x:Class="FileTreeHierarhy.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FileTreeHierarhy"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <WrapPanel Name="wpInfoPanel" VerticalAlignment="Top" Background="Bisque">
+            <Label Name="lblMainFolder" VerticalAlignment="Top" HorizontalAlignment="Left" Width="700">Ścieżka do wybranego folderu: </Label>
+            <ProgressBar VerticalAlignment="Top"></ProgressBar>
+            <Button Content="Click me" Click="ButtonBase_OnClick"></Button>
+        </WrapPanel>
+    </Grid>
+</Window>
