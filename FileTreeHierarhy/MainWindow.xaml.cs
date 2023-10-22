@@ -18,6 +18,9 @@ namespace FileTreeHierarhy
 		{
 			var dirs = Directory.GetDirectories(@"D:\Programowanie\Workspace", "*",
 				SearchOption.AllDirectories).ToList();
+			
+			DirectoryTree.BuildDirectoryTree(dirs.First(), 0);
+			
 			//
 			// var allFiles = new List<string>();
 			// foreach (var dir in dirs)
@@ -38,15 +41,15 @@ namespace FileTreeHierarhy
 			// 	@"D:\1\2\3\4\5\6",
 			// };
 
-			var orderedPaths = dirs.OrderByDescending(x => x.Count(x => x == '\\'));
-
-			var testPath0 = orderedPaths.First();
-
-			var test1 = AsciiTree.BuildSegments(testPath0);
-			foreach (var path in orderedPaths.Skip(1))
-				AsciiTree.AppendHierarhy(test1, path);
-
-			var i = 0;
+			// var orderedPaths = dirs.OrderByDescending(x => x.Count(x => x == '\\'));
+			//
+			// var testPath0 = orderedPaths.First();
+			//
+			// var test1 = AsciiTree.BuildSegments(testPath0);
+			// foreach (var path in orderedPaths.Skip(1))
+			// 	AsciiTree.AppendHierarhy(test1, path);
+			//
+			// var i = 0;
 
 
 
