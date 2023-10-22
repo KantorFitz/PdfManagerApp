@@ -7,5 +7,9 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
     </PropertyGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="Verticular.Extensions.Strings" Version="1.0.1" />
+    </ItemGroup>
 
 </Project>

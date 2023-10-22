@@ -6,7 +6,24 @@
         xmlns:local="clr-namespace:PdfManagerApp"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
+    <StackPanel>
+        <Grid Margin="0 10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="4*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
 
-    </Grid>
+            <Button Name="FolderPickerButton" Content="Wybierz folder" HorizontalAlignment="Left" Margin="10 0 0 0" Grid.Column="0" Click="FolderPickerButton_OnClick"/>
+            <TextBox Name="ChoosenFolderPath" Text="Aktualna ścieżka" Grid.Column="1" Foreground="Tan" IsEnabled="False" Background="White" />
+            <Button Name="AddToFolderList" Content="Dodaj do listy" Grid.Column="2" HorizontalAlignment="Center" Click="AddToFolderList_OnClick"/>
+            <Button Name="ScanFolder" Content="Skanuj folder" Margin="0 0 10 0" Grid.Column="3" HorizontalAlignment="Right" Click="ScanFolder_OnClick"/> <!-- msgbox for now -->
+
+        </Grid>
+
+        <ListBox Name="AddedFolders" Height="100" />
+
+
+    </StackPanel>
 </Window>
