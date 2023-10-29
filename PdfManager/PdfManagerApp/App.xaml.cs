@@ -1,5 +1,6 @@
 ﻿using System.Configuration;
 using System.Data;
+using System.Text;
 using System.Windows;
 
 namespace PdfManagerApp;
@@ -9,4 +10,8 @@ namespace PdfManagerApp;
 /// </summary>
 public partial class App : Application
 {
+    public App()
+    {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+    }
 }

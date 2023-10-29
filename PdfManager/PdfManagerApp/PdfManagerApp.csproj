@@ -9,7 +9,9 @@
     </PropertyGroup>
     
     <ItemGroup>
+        <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
         <PackageReference Include="Verticular.Extensions.Strings" Version="1.0.1" />
+        <PackageReference Include="iTextSharp" Version="5.5.13.3" />
     </ItemGroup>
 
 </Project>

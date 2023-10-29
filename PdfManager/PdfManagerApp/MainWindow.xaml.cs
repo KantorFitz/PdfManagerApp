@@ -1,6 +1,9 @@
 ﻿using System.IO;
 using System.Windows;
+using iTextSharp.text.pdf;
+using iTextSharp.text.pdf.parser;
 using Microsoft.Win32;
+using Path = System.IO.Path;
 
 namespace PdfManagerApp;
 
@@ -9,10 +12,14 @@ namespace PdfManagerApp;
 /// </summary>
 public partial class MainWindow : Window
 {
+    private CancellationTokenSource _cts = new();
+    private bool _lockedObject = false;
+
     public MainWindow()
     {
         InitializeComponent();
     }
+
 
     private void FolderPickerButton_OnClick(object sender, RoutedEventArgs e)
     {
@@ -25,58 +32,125 @@ public partial class MainWindow : Window
 
         if (!folderPicker.FolderName.IsNullOrEmpty())
         {
-            ChoosenFolderPath.Text = folderPicker.FolderName;
+            tbxChoosenFolderPath.Text = folderPicker.FolderName;
         }
     }
 
     private void AddToFolderList_OnClick(object sender, RoutedEventArgs e)
     {
-        if (ChoosenFolderPath.Text.IsNullOrEmpty())
-        {
+        if (tbxChoosenFolderPath.Text.IsNullOrEmpty())
             return;
-        }
 
-        if (!AddedFolders.Items.Contains(ChoosenFolderPath.Text))
-        {
-            AddedFolders.Items.Add(ChoosenFolderPath.Text);
-        }
+        if (!Directory.Exists(tbxChoosenFolderPath.Text))
+            return;
+
+        if (lboAddedFolders.Items.Contains(tbxChoosenFolderPath.Text))
+            return;
+
+        lboAddedFolders.Items.Add(tbxChoosenFolderPath.Text);
+
+        UpdatePdfList();
     }
 
     private void ScanFolder_OnClick(object sender, RoutedEventArgs e)
     {
-        var foundPdfs = GetFolderPdfsCount(ChoosenFolderPath.Text, 1);
+        var foundPdfs = GetFolderPdfs(tbxChoosenFolderPath.Text).ToList();
 
-        if (foundPdfs < 0)
+        if (foundPdfs.Count == 0)
         {
             MessageBox.Show(this, "Nie znaleziono plików PDF.", "Skanowanie folderu", MessageBoxButton.OK);
             return;
         }
 
-        MessageBox.Show(this, $"Znaleziono plików PDF: {foundPdfs}", "Skanowanie folderu", MessageBoxButton.OK);
-        
+        MessageBox.Show(this, $"Znaleziono plików PDF: {foundPdfs.Count}", "Skanowanie folderu", MessageBoxButton.OK);
+
         // MessageBox.Show()
     }
 
-    /// <summary>
-    /// 0 - scan all subfolders otherwise scan only up to given level <br /><br />
-    /// 
-    ///-1 when folder doesnt exist, <br />
-    /// 0 or more otherwise
-    /// </summary>
-    private static int GetFolderPdfsCount(string path, byte scanLevel = 0)
+    private static IEnumerable<string> GetFolderPdfs(string path, byte scanLevel = 0)
     {
         var dirInfo = new DirectoryInfo(path);
 
         if (!dirInfo.Exists)
-            return -1;
+            return new List<string>();
 
-        var pdfCount = dirInfo.GetFiles("*.pdf", new EnumerationOptions
+        var pdfs = dirInfo.EnumerateFiles("*.pdf", new EnumerationOptions
+            {
+                RecurseSubdirectories = true,
+                MaxRecursionDepth = scanLevel,
+            })
+            .AsParallel()
+            .Select(x => x.FullName);
+
+        return pdfs;
+    }
+
+    private void UpdatePdfList()
+    {
+        var obtainedPdfs = GetFolderPdfs(tbxChoosenFolderPath.Text, 0);
+
+        foreach (var obtainedPdf in obtainedPdfs.Where(obtainedPdf => !lboAddedPdfs.Items.Contains(obtainedPdf)))
         {
-            RecurseSubdirectories = true,
-            MaxRecursionDepth = scanLevel
-        });
+            lboAddedPdfs.Items.Add(obtainedPdf);
+        }
 
-        return pdfCount.Length;
+        pbFilesCompleted.Maximum = lboAddedPdfs.Items.Count;
+    }
+
+    private async void BtnStartSearch_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (_lockedObject)
+            return;
+
+        _lockedObject = true;
+        _cts = new();
+
+        var foundOccurences = new Dictionary<string, List<int>>();
+        var textToSearch = tboSearchText.Text;
+
+        pbFilesCompleted.Value = 0;
+
+        foreach (var pdfPath in lboAddedPdfs.Items.Cast<string>())
+        {
+            if (_cts.IsCancellationRequested)
+                continue;
+
+            await Task.Run(() =>
+            {
+                PdfReader? pdf = null;
+                try
+                {
+                    pdf = new PdfReader(pdfPath);
+                    var totalPagesCount = pdf.NumberOfPages;
+
+                    for (var i = 1; i <= totalPagesCount; i++)
+                    {
+                        var extractedText = PdfTextExtractor.GetTextFromPage(pdf, i);
+
+                        if (!extractedText.Contains(textToSearch))
+                            continue;
+
+                        var pdfName = Path.GetFileName(pdfPath);
+                        if (foundOccurences.ContainsKey(pdfName))
+                            foundOccurences[pdfName].Add(i);
+                        else
+                            foundOccurences[pdfName] = new List<int> { i };
+                    }
+                }
+                finally
+                {
+                    pdf?.Dispose();
+                }
+
+                Application.Current.Dispatcher.Invoke(() => { pbFilesCompleted.Value += 1; });
+
+            }, _cts.Token);
+        }
+    }
+
+    private async void BtnCancelSearch_OnClick(object sender, RoutedEventArgs e)
+    {
+        await _cts.CancelAsync();
+        _lockedObject = false;
     }
 }
-

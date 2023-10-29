@@ -15,15 +15,47 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <Button Name="FolderPickerButton" Content="Wybierz folder" HorizontalAlignment="Left" Margin="10 0 0 0" Grid.Column="0" Click="FolderPickerButton_OnClick"/>
-            <TextBox Name="ChoosenFolderPath" Text="Aktualna ścieżka" Grid.Column="1" Foreground="Tan" IsEnabled="False" Background="White" />
-            <Button Name="AddToFolderList" Content="Dodaj do listy" Grid.Column="2" HorizontalAlignment="Center" Click="AddToFolderList_OnClick"/>
-            <Button Name="ScanFolder" Content="Skanuj folder" Margin="0 0 10 0" Grid.Column="3" HorizontalAlignment="Right" Click="ScanFolder_OnClick"/> <!-- msgbox for now -->
+            <Button Name="btnFolderPicker" Content="Wybierz folder" HorizontalAlignment="Left" Margin="10 0 0 0" Grid.Column="0" Click="FolderPickerButton_OnClick" />
+            <TextBox Name="tbxChoosenFolderPath" Text="Aktualna ścieżka" Grid.Column="1" Foreground="Tan" IsEnabled="False" Background="White" />
+            <Button Name="btnAddToFolderList" Content="Dodaj do listy" Grid.Column="2" HorizontalAlignment="Center" Click="AddToFolderList_OnClick" />
+            <Button Name="btnScanFolder" Content="Skanuj folder" Margin="0 0 10 0" Grid.Column="3" HorizontalAlignment="Right" Click="ScanFolder_OnClick" />
+            <!-- msgbox for now -->
 
         </Grid>
 
-        <ListBox Name="AddedFolders" Height="100" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition />
+                <ColumnDefinition Width="3*"/>
+            </Grid.ColumnDefinitions>
 
+            <ListBox Grid.Column="0" Name="lboAddedFolders" Height="100" />
+            <ListBox Grid.Column="2" Name="lboAddedPdfs" Height="100" />
+        </Grid>
+
+        <Grid Margin="0 20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="1.2*" />
+                <ColumnDefinition Width="0.8*" />
+            </Grid.ColumnDefinitions>
+            
+            <TextBox Name="tboSearchText" Grid.Column="0" IsEnabled="True" />
+            <Button Name="btnStartSearch" Grid.Column="1" HorizontalAlignment="Left" Margin="10 0 0 0" Content="Wyszukaj tekst" Click="BtnStartSearch_OnClick" />
+            <ProgressBar Name="pbFilesCompleted" Grid.Column="2" Value="0"/>
+            <Button Name="btnCancelSearch" Grid.Column="3" HorizontalAlignment="Right" Margin="0 0 10 0" Content="Anuluj wyszukiwanie" Click="BtnCancelSearch_OnClick"/>
+        </Grid>
+        
+        <Grid>
+            <DataGrid Name="dgrFoundOccurrences" Height="150">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Nazwa pliku" Width="400"/>
+                    <DataGridTextColumn Header="Numer strony" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
 
     </StackPanel>
 </Window>
