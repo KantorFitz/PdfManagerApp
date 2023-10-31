@@ -115,6 +115,8 @@ public partial class MainWindow : Window
             if (_cts.IsCancellationRequested)
                 continue;
 
+            var pdfName = Path.GetFileName(pdfPath);
+
             await Task.Run(() =>
             {
                 PdfReader? pdf = null;
@@ -130,7 +132,6 @@ public partial class MainWindow : Window
                         if (!extractedText.Contains(textToSearch))
                             continue;
 
-                        var pdfName = Path.GetFileName(pdfPath);
                         if (foundOccurences.ContainsKey(pdfName))
                             foundOccurences[pdfName].Add(i);
                         else
