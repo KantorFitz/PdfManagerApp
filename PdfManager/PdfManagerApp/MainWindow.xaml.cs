@@ -3,6 +3,7 @@ using System.Windows;
 using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
 using Microsoft.Win32;
+using PdfManagerApp.Models;
 using Path = System.IO.Path;
 
 namespace PdfManagerApp;
@@ -13,7 +14,6 @@ namespace PdfManagerApp;
 public partial class MainWindow : Window
 {
     private CancellationTokenSource _cts = new();
-    private bool _lockedObject = false;
 
     public MainWindow()
     {
@@ -34,6 +34,8 @@ public partial class MainWindow : Window
         {
             tbxChoosenFolderPath.Text = folderPicker.FolderName;
         }
+        
+        lblPdfAmountValue.Content = GetFolderPdfs(tbxChoosenFolderPath.Text).Count();
     }
 
     private void AddToFolderList_OnClick(object sender, RoutedEventArgs e)
@@ -50,21 +52,6 @@ public partial class MainWindow : Window
         lboAddedFolders.Items.Add(tbxChoosenFolderPath.Text);
 
         UpdatePdfList();
-    }
-
-    private void ScanFolder_OnClick(object sender, RoutedEventArgs e)
-    {
-        var foundPdfs = GetFolderPdfs(tbxChoosenFolderPath.Text).ToList();
-
-        if (foundPdfs.Count == 0)
-        {
-            MessageBox.Show(this, "Nie znaleziono plików PDF.", "Skanowanie folderu", MessageBoxButton.OK);
-            return;
-        }
-
-        MessageBox.Show(this, $"Znaleziono plików PDF: {foundPdfs.Count}", "Skanowanie folderu", MessageBoxButton.OK);
-
-        // MessageBox.Show()
     }
 
     private static IEnumerable<string> GetFolderPdfs(string path, byte scanLevel = 0)
@@ -99,59 +86,102 @@ public partial class MainWindow : Window
 
     private async void BtnStartSearch_OnClick(object sender, RoutedEventArgs e)
     {
-        if (_lockedObject)
+        if (_cts.Token.IsCancellationRequested)
+        {
+            _cts.Dispose();
+            _cts = new();
+            
             return;
+        }
 
-        _lockedObject = true;
-        _cts = new();
-
-        var foundOccurences = new Dictionary<string, List<int>>();
         var textToSearch = tboSearchText.Text;
 
         pbFilesCompleted.Value = 0;
-
-        foreach (var pdfPath in lboAddedPdfs.Items.Cast<string>())
+        
+        await Application.Current.Dispatcher.InvokeAsync(() =>
         {
-            if (_cts.IsCancellationRequested)
-                continue;
+            dgrFoundOccurrences.Items.Clear();
+        });
 
-            var pdfName = Path.GetFileName(pdfPath);
+        var pdfPaths = lboAddedPdfs.Items.Cast<string>().ToList();
 
-            await Task.Run(() =>
+        try
+        {
+            foreach (var pdfPath in pdfPaths)
             {
-                PdfReader? pdf = null;
-                try
-                {
-                    pdf = new PdfReader(pdfPath);
-                    var totalPagesCount = pdf.NumberOfPages;
+                if (_cts.IsCancellationRequested)
+                    continue;
 
-                    for (var i = 1; i <= totalPagesCount; i++)
-                    {
-                        var extractedText = PdfTextExtractor.GetTextFromPage(pdf, i);
-
-                        if (!extractedText.Contains(textToSearch))
-                            continue;
-
-                        if (foundOccurences.ContainsKey(pdfName))
-                            foundOccurences[pdfName].Add(i);
-                        else
-                            foundOccurences[pdfName] = new List<int> { i };
-                    }
-                }
-                finally
-                {
-                    pdf?.Dispose();
-                }
-
-                Application.Current.Dispatcher.Invoke(() => { pbFilesCompleted.Value += 1; });
-
-            }, _cts.Token);
+                await Task.Run(() => ProcessPdfFile(pdfPath, textToSearch), _cts.Token).ConfigureAwait(false);
+            }
         }
+        catch (Exception exception)
+        {
+            MessageBox.Show(exception.Message, "Error occured");
+        }
+        finally
+        {
+            _cts.Dispose();
+        }
+    }
+
+    private async Task ProcessPdfFile(string pdfPath, string textToSearch)
+    {
+        if (_cts.Token.IsCancellationRequested)
+            return;
+
+        using var pdf = new PdfReader(pdfPath);
+
+        var fileName = Path.GetFileName(pdfPath);
+        
+        await Application.Current.Dispatcher.InvokeAsync(() =>
+        {
+            CurrentFileWorkLabel.Content = $"{fileName}  |  {pdf.NumberOfPages} p";
+        });
+
+        var tasks = Enumerable.Range(1, pdf.NumberOfPages).Select(x => SearchPdfPage(pdf, x, textToSearch)).ToList();
+
+        var pages = await Task.WhenAll(tasks);
+
+        var foundOccurrences = new List<TextOccurenceModel>();
+        
+        foreach (var result in pages)
+        {
+            foundOccurrences.AddRange(
+                result
+                    .First()
+                    .Value
+                    .Select(sentence => new TextOccurenceModel
+                    {
+                        BookName = fileName,
+                        FoundOnPage = result.First().Key,
+                        Sentence = sentence.Trim()
+                    }));
+        }
+
+        await Application.Current.Dispatcher.InvokeAsync(() => { foundOccurrences.ForEach(x => dgrFoundOccurrences.Items.Add(x)); });
+
+        await Application.Current.Dispatcher.InvokeAsync(() => pbFilesCompleted.Value += 1);
+    }
+
+    private async Task<Dictionary<int, List<string>>> SearchPdfPage(PdfReader pdf, int pageNumber, string textToSearch)
+    {
+        if (_cts.Token.IsCancellationRequested)
+            return await Task.FromResult(new Dictionary<int, List<string>>
+            {
+                [pageNumber] = new()
+            });
+        
+        var extractedText = PdfTextExtractor.GetTextFromPage(pdf, pageNumber);
+
+        return await Task.FromResult(new Dictionary<int, List<string>>
+        {
+            [pageNumber] = extractedText.Split(new []{".", "\n", "\n\t"}, StringSplitOptions.None).Where(sentence => sentence.Contains(textToSearch)).ToList()
+        });
     }
 
     private async void BtnCancelSearch_OnClick(object sender, RoutedEventArgs e)
     {
         await _cts.CancelAsync();
-        _lockedObject = false;
     }
 }

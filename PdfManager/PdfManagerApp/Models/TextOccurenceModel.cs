@@ -3,5 +3,6 @@
 public class TextOccurenceModel
 {
     public string BookName { get; set; }
+    public string Sentence { get; set; }   
     public int FoundOnPage { get; set; }
 }

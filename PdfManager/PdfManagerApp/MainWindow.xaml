@@ -9,50 +9,55 @@
     <StackPanel>
         <Grid Margin="0 10">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="1*" />
                 <ColumnDefinition Width="4*" />
+                <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <Button Name="btnFolderPicker" Content="Wybierz folder" HorizontalAlignment="Left" Margin="10 0 0 0" Grid.Column="0" Click="FolderPickerButton_OnClick" />
+            <Button Name="btnFolderPicker" Content="Wybierz folder" Grid.Column="0" HorizontalAlignment="Left" Margin="10 0 0 0" Click="FolderPickerButton_OnClick" />
             <TextBox Name="tbxChoosenFolderPath" Text="Aktualna ścieżka" Grid.Column="1" Foreground="Tan" IsEnabled="False" Background="White" />
             <Button Name="btnAddToFolderList" Content="Dodaj do listy" Grid.Column="2" HorizontalAlignment="Center" Click="AddToFolderList_OnClick" />
-            <Button Name="btnScanFolder" Content="Skanuj folder" Margin="0 0 10 0" Grid.Column="3" HorizontalAlignment="Right" Click="ScanFolder_OnClick" />
-            <!-- msgbox for now -->
-
+            <Label Name="lblPdfAmount" Content="Ilość Pdf:" Grid.Column="3" HorizontalAlignment="Right" />
+            <Label Name="lblPdfAmountValue" Content="..." Grid.Column="4" HorizontalAlignment="Left" />
         </Grid>
 
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="2*"/>
-                <ColumnDefinition />
                 <ColumnDefinition Width="3*"/>
             </Grid.ColumnDefinitions>
 
             <ListBox Grid.Column="0" Name="lboAddedFolders" Height="100" />
-            <ListBox Grid.Column="2" Name="lboAddedPdfs" Height="100" />
+            <ListBox Grid.Column="1" Name="lboAddedPdfs" Height="100" />
         </Grid>
 
         <Grid Margin="0 20">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1.5*" />
                 <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="1.2*" />
+                <ColumnDefinition Width="1.8*" />
                 <ColumnDefinition Width="0.8*" />
             </Grid.ColumnDefinitions>
             
             <TextBox Name="tboSearchText" Grid.Column="0" IsEnabled="True" />
             <Button Name="btnStartSearch" Grid.Column="1" HorizontalAlignment="Left" Margin="10 0 0 0" Content="Wyszukaj tekst" Click="BtnStartSearch_OnClick" />
-            <ProgressBar Name="pbFilesCompleted" Grid.Column="2" Value="0"/>
+            
+            <StackPanel Grid.Column="2" >
+                <ProgressBar Name="pbFilesCompleted" Value="0" VerticalAlignment="Top" Height="10"/>
+                <Label Name="CurrentFileWorkLabel" Content="Current file" MaxHeight="10" Padding="0 0 0 0" FontSize="8" VerticalAlignment="Bottom"/>
+            </StackPanel>
+
             <Button Name="btnCancelSearch" Grid.Column="3" HorizontalAlignment="Right" Margin="0 0 10 0" Content="Anuluj wyszukiwanie" Click="BtnCancelSearch_OnClick"/>
         </Grid>
         
         <Grid>
-            <DataGrid Name="dgrFoundOccurrences" Height="150">
+            <DataGrid Name="dgrFoundOccurrences" Height="150" IsReadOnly="True" >
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Nazwa pliku" Width="400"/>
-                    <DataGridTextColumn Header="Numer strony" />
+                    <DataGridTextColumn Header="Nazwa pliku"  Binding="{Binding BookName}"/>
+                    <DataGridTextColumn Header="Numer strony" Binding="{Binding FoundOnPage}"/>
+                    <DataGridTextColumn Header="Zdanie z zawartością" Binding="{Binding Sentence}"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
