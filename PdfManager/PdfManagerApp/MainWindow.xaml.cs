@@ -13,7 +13,10 @@ namespace PdfManagerApp;
 /// </summary>
 public partial class MainWindow : Window
 {
-    private CancellationTokenSource _cts = new();
+    private CancellationTokenSource _cts;
+
+    private bool isSearching;
+    private List<TextOccurenceModel> _foundOccurrences = new();
 
     public MainWindow()
     {
@@ -86,15 +89,18 @@ public partial class MainWindow : Window
 
     private async void BtnStartSearch_OnClick(object sender, RoutedEventArgs e)
     {
-        if (_cts.Token.IsCancellationRequested)
-        {
-            _cts.Dispose();
-            _cts = new();
-            
+        if (isSearching)
             return;
-        }
+        
+        _cts?.Dispose();
+        _cts = new();
+
+        isSearching = true;
 
         var textToSearch = tboSearchText.Text;
+
+        if (textToSearch.IsNullOrEmpty())
+            return;
 
         pbFilesCompleted.Value = 0;
         
@@ -110,18 +116,14 @@ public partial class MainWindow : Window
             foreach (var pdfPath in pdfPaths)
             {
                 if (_cts.IsCancellationRequested)
-                    continue;
+                    break;
 
-                await Task.Run(() => ProcessPdfFile(pdfPath, textToSearch), _cts.Token).ConfigureAwait(false);
+                await Task.Run(() => ProcessPdfFile(pdfPath, textToSearch), _cts.Token);
             }
         }
         catch (Exception exception)
         {
             MessageBox.Show(exception.Message, "Error occured");
-        }
-        finally
-        {
-            _cts.Dispose();
         }
     }
 
@@ -139,49 +141,46 @@ public partial class MainWindow : Window
             CurrentFileWorkLabel.Content = $"{fileName}  |  {pdf.NumberOfPages} p";
         });
 
-        var tasks = Enumerable.Range(1, pdf.NumberOfPages).Select(x => SearchPdfPage(pdf, x, textToSearch)).ToList();
-
-        var pages = await Task.WhenAll(tasks);
-
-        var foundOccurrences = new List<TextOccurenceModel>();
-        
-        foreach (var result in pages)
+        var handledPage = 1;
+        while (!_cts.IsCancellationRequested || handledPage >= pdf.NumberOfPages)
         {
-            foundOccurrences.AddRange(
-                result
-                    .First()
-                    .Value
-                    .Select(sentence => new TextOccurenceModel
-                    {
-                        BookName = fileName,
-                        FoundOnPage = result.First().Key,
-                        Sentence = sentence.Trim()
-                    }));
+            await SearchPdfPage(pdf, handledPage, textToSearch, fileName);
+            handledPage++;
         }
-
-        await Application.Current.Dispatcher.InvokeAsync(() => { foundOccurrences.ForEach(x => dgrFoundOccurrences.Items.Add(x)); });
-
-        await Application.Current.Dispatcher.InvokeAsync(() => pbFilesCompleted.Value += 1);
+        
+        await Application.Current.Dispatcher.InvokeAsync(() =>
+        {
+            _foundOccurrences.ForEach(x => dgrFoundOccurrences.Items.Add(x));
+            pbFilesCompleted.Value += 1;
+        });
+        
+        _foundOccurrences.Clear();
     }
 
-    private async Task<Dictionary<int, List<string>>> SearchPdfPage(PdfReader pdf, int pageNumber, string textToSearch)
+    private Task SearchPdfPage(PdfReader pdf, int pageNumber, string textToSearch, string fileName)
     {
         if (_cts.Token.IsCancellationRequested)
-            return await Task.FromResult(new Dictionary<int, List<string>>
-            {
-                [pageNumber] = new()
-            });
+            return Task.CompletedTask;
         
         var extractedText = PdfTextExtractor.GetTextFromPage(pdf, pageNumber);
 
-        return await Task.FromResult(new Dictionary<int, List<string>>
-        {
-            [pageNumber] = extractedText.Split(new []{".", "\n", "\n\t"}, StringSplitOptions.None).Where(sentence => sentence.Contains(textToSearch)).ToList()
-        });
+        _foundOccurrences.AddRange(
+            extractedText
+                .Split(new[] { ".", "\n", Environment.NewLine }, StringSplitOptions.None)
+                .Where(sentence => sentence.Contains(textToSearch))
+                .Select(x => new TextOccurenceModel
+                {
+                    BookName = fileName,
+                    FoundOnPage = pageNumber,
+                    Sentence = x.Trim()
+                })
+        );
+        return Task.CompletedTask;
     }
 
-    private async void BtnCancelSearch_OnClick(object sender, RoutedEventArgs e)
+    private void BtnCancelSearch_OnClick(object sender, RoutedEventArgs e)
     {
-        await _cts.CancelAsync();
+        _cts?.Cancel();
+        isSearching = false;
     }
 }
