@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PdfManagerApp"
         mc:Ignorable="d"
+        xmlns:rs="clr-namespace:PdfManagerApp.Localization"
         Title="MainWindow" Height="450" Width="800">
     <StackPanel>
         <Grid Margin="0 10">

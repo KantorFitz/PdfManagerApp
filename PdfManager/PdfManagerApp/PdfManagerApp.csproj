@@ -13,5 +13,21 @@
         <PackageReference Include="Verticular.Extensions.Strings" Version="1.0.1" />
         <PackageReference Include="iTextSharp" Version="5.5.13.3" />
     </ItemGroup>
+    
+    <ItemGroup>
+      <EmbeddedResource Update="Localization\Locales.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Locales.Designer.cs</LastGenOutput>
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </EmbeddedResource>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Compile Update="Localization\Locales.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Locales.resx</DependentUpon>
+      </Compile>
+    </ItemGroup>
 
 </Project>
