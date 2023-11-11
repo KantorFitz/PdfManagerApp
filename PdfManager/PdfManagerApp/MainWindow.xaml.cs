@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
 using Microsoft.Win32;
@@ -88,9 +89,14 @@ public partial class MainWindow : Window
 
     private async void BtnStartSearch_OnClick(object sender, RoutedEventArgs e)
     {
+        if (tboSearchText.Text.IsNullOrEmpty() || tboSearchText.Text.IsNullOrWhiteSpace())
+            return;
+
         if (isSearching)
             return;
-        
+
+        (sender as Button)!.IsEnabled = false;
+
         _cts?.Dispose();
         _cts = new();
 
@@ -102,7 +108,7 @@ public partial class MainWindow : Window
             return;
 
         pbFilesCompleted.Value = 0;
-        
+
         await Application.Current.Dispatcher.InvokeAsync(() =>
         {
             dgrFoundOccurrences.Items.Clear();
@@ -112,18 +118,23 @@ public partial class MainWindow : Window
 
         try
         {
-            foreach (var pdfPath in pdfPaths)
+            foreach (var pdfPath in pdfPaths.TakeWhile(_ => !_cts.IsCancellationRequested))
             {
-                if (_cts.IsCancellationRequested)
-                    break;
-
                 await Task.Run(() => ProcessPdfFile(pdfPath, textToSearch), _cts.Token);
             }
         }
         catch (Exception exception)
         {
+            await _cts.CancelAsync();
             MessageBox.Show(exception.Message, "Error occured");
         }
+        finally
+        {
+            isSearching = false;
+            
+            (sender as Button)!.IsEnabled = true;
+        }
+
     }
 
     private async Task ProcessPdfFile(string pdfPath, string textToSearch)
@@ -175,7 +186,8 @@ public partial class MainWindow : Window
 
         _foundOccurrences.AddRange(
             extractedText
-                .Split(new[] { ".", "\n", Environment.NewLine }, StringSplitOptions.None)
+                .Split(new[] { ".", "\n", Environment.NewLine }, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+                .AsParallel()
                 .Where(sentence => sentence.Contains(textToSearch))
                 .Select(x => new TextOccurenceModel
                 {
