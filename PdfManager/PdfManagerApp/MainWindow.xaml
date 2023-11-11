@@ -36,22 +36,24 @@
 
         <Grid Margin="0 20">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="1.5*" />
                 <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="1.8*" />
-                <ColumnDefinition Width="0.8*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             
             <TextBox Name="tboSearchText" Grid.Column="0" IsEnabled="True" />
-            <Button Name="btnStartSearch" Grid.Column="1" HorizontalAlignment="Left" Margin="10 0 0 0" Content="Wyszukaj tekst" Click="BtnStartSearch_OnClick" />
+            <Button Name="btnCancelSearch" Grid.Column="1" HorizontalAlignment="Left" Margin="10 0 0 0" Width="150" Content="Anuluj wyszukiwanie" Click="BtnCancelSearch_OnClick"/>
+            <Button Name="btnStartSearch" Grid.Column="1" HorizontalAlignment="Left" Margin="10 0 0 0" Width="150" Content="Wyszukaj tekst" Click="BtnStartSearch_OnClick" />
+            <Button Name="btnExportToCsv" Grid.Column="2" HorizontalAlignment="Left" Margin="10 0 0 0" Content="Eksport do CSV" Click="BtnExportToCsv_OnClick"/>
+
             
-            <StackPanel Grid.Column="2" >
+            <StackPanel Grid.Column="3" Margin="0 0 0 0">
                 <ProgressBar Name="pbFilesCompleted" Value="0" VerticalAlignment="Top" Height="5"/>
                 <ProgressBar Name="pbFileCompleted" Value="0" VerticalAlignment="Top" Height="5"/>
-                <Label Name="CurrentFileWorkLabel" Content="Current file" MaxHeight="10" Padding="0 0 0 0" FontSize="8" VerticalAlignment="Bottom"/>
+                <Label Name="CurrentFileWorkLabel" Content="Current file" MaxHeight="10" Padding="0 0 0 0" FontSize="8" />
             </StackPanel>
 
-            <Button Name="btnCancelSearch" Grid.Column="3" HorizontalAlignment="Right" Margin="0 0 10 0" Content="Anuluj wyszukiwanie" Click="BtnCancelSearch_OnClick"/>
         </Grid>
         
         <Grid Height="200">

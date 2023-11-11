@@ -1,6 +1,10 @@
-﻿using System.IO;
+﻿using System.Globalization;
+using System.IO;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using CsvHelper;
+using CsvHelper.Configuration;
 using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
 using Microsoft.Win32;
@@ -95,7 +99,7 @@ public partial class MainWindow : Window
         if (isSearching)
             return;
 
-        (sender as Button)!.IsEnabled = false;
+        (sender as Button)!.Visibility = Visibility.Hidden;
 
         _cts?.Dispose();
         _cts = new();
@@ -203,5 +207,48 @@ public partial class MainWindow : Window
     {
         _cts?.Cancel();
         isSearching = false;
+        
+        btnStartSearch.Visibility = Visibility.Visible;
+    }
+
+    private void BtnExportToCsv_OnClick(object sender, RoutedEventArgs e)
+    {
+        if (dgrFoundOccurrences.Items.IsEmpty)
+            return;
+
+        if (isSearching)
+            return;
+
+        var saveFileDialog = new SaveFileDialog
+        {
+            Title = "Zapis do pliku CSV",
+            Filter = "Plik CSV (*.csv)|*.csv",
+            DefaultExt = ".csv",
+            AddExtension = true,
+        };
+
+        saveFileDialog.ShowDialog(this);
+
+        var savePath = saveFileDialog.FileName;
+
+        if (savePath.IsNullOrEmpty())
+            return;
+
+        var dataToSave = dgrFoundOccurrences.Items.Cast<TextOccurenceModel>().ToList();
+
+        var csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
+        {
+            Delimiter = ";",
+            Encoding = new UTF8Encoding(true)
+        };
+        
+        using var writer = new StreamWriter(savePath);
+        using var csv = new CsvWriter(writer, csvConfig);
+
+        csv.Context.RegisterClassMap<TextOccurenceModelMap>();
+
+        csv.WriteHeader<TextOccurenceModel>();
+        csv.NextRecord();
+        csv.WriteRecords(dataToSave);
     }
 }
