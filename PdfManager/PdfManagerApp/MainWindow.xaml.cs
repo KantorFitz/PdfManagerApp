@@ -23,7 +23,6 @@ public partial class MainWindow : Window
         InitializeComponent();
     }
 
-
     private void FolderPickerButton_OnClick(object sender, RoutedEventArgs e)
     {
         var folderPicker = new OpenFolderDialog
@@ -133,6 +132,12 @@ public partial class MainWindow : Window
             return;
 
         using var pdf = new PdfReader(pdfPath);
+        
+        await Application.Current.Dispatcher.InvokeAsync(() =>
+        {
+            pbFileCompleted.Maximum = pdf.NumberOfPages;
+            pbFileCompleted.Value = 1;
+        });
 
         var fileName = Path.GetFileName(pdfPath);
         
@@ -142,12 +147,16 @@ public partial class MainWindow : Window
         });
 
         var handledPage = 1;
-        while (!_cts.IsCancellationRequested || handledPage >= pdf.NumberOfPages)
+        while (!_cts.IsCancellationRequested && handledPage < pdf.NumberOfPages)
         {
             await SearchPdfPage(pdf, handledPage, textToSearch, fileName);
             handledPage++;
+            await Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                pbFileCompleted.Value += 1;
+            });
         }
-        
+
         await Application.Current.Dispatcher.InvokeAsync(() =>
         {
             _foundOccurrences.ForEach(x => dgrFoundOccurrences.Items.Add(x));

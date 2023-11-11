@@ -46,15 +46,16 @@
             <Button Name="btnStartSearch" Grid.Column="1" HorizontalAlignment="Left" Margin="10 0 0 0" Content="Wyszukaj tekst" Click="BtnStartSearch_OnClick" />
             
             <StackPanel Grid.Column="2" >
-                <ProgressBar Name="pbFilesCompleted" Value="0" VerticalAlignment="Top" Height="10"/>
+                <ProgressBar Name="pbFilesCompleted" Value="0" VerticalAlignment="Top" Height="5"/>
+                <ProgressBar Name="pbFileCompleted" Value="0" VerticalAlignment="Top" Height="5"/>
                 <Label Name="CurrentFileWorkLabel" Content="Current file" MaxHeight="10" Padding="0 0 0 0" FontSize="8" VerticalAlignment="Bottom"/>
             </StackPanel>
 
             <Button Name="btnCancelSearch" Grid.Column="3" HorizontalAlignment="Right" Margin="0 0 10 0" Content="Anuluj wyszukiwanie" Click="BtnCancelSearch_OnClick"/>
         </Grid>
         
-        <Grid>
-            <DataGrid Name="dgrFoundOccurrences" Height="150" IsReadOnly="True" >
+        <Grid Height="200">
+            <DataGrid Name="dgrFoundOccurrences" IsReadOnly="True">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Nazwa pliku"  Binding="{Binding BookName}"/>
                     <DataGridTextColumn Header="Numer strony" Binding="{Binding FoundOnPage}"/>
