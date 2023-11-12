@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileTreeHierarhy", "FileTre
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PDFManager", "PDFManager", "{49BB7AFD-95D9-45A7-837A-6842BEEA8FF5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PDFManagerExperimensApp", "PdfManager\PDFManagerExperimensApp\PDFManagerExperimensApp.csproj", "{F74CF75F-00E2-4D01-9DCA-9482F31D9EE1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfManagerApp.Playground", "PdfManager\PdfManagerApp.Playground\PdfManagerApp.Playground.csproj", "{F74CF75F-00E2-4D01-9DCA-9482F31D9EE1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PdfManagerApp", "PdfManager\PdfManagerApp\PdfManagerApp.csproj", "{BA788AC5-EF57-4B18-B732-F8F25E34131F}"
 EndProject
