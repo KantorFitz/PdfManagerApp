@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net5.0-windows</TargetFramework>
         <LangVersion>12</LangVersion>
         <RootNamespace>PDFManagerApp</RootNamespace>
     </PropertyGroup>
@@ -16,6 +16,9 @@
 
     <ItemGroup>
       <None Update="PDFs\SamplePdf.pdf">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
+      <None Update="PDFs\sample-pdf-with-images.pdf">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
     </ItemGroup>
