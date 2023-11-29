@@ -9,9 +9,10 @@ using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
 using Microsoft.Win32;
 using PdfManagerApp.Models;
+using PdfManagerApp.ViewModels;
 using Path = System.IO.Path;
 
-namespace PdfManagerApp;
+namespace PdfManagerApp.Views;
 
 /// <summary>
 /// Interaction logic for MainWindow.xaml
@@ -20,12 +21,13 @@ public partial class MainWindow : Window
 {
     private CancellationTokenSource _cts;
 
-    private bool isSearching;
-    private List<TextOccurenceModel> _foundOccurrences = new();
+    private bool _isSearching;
+    private readonly MainWindowViewModel _viewModel = new();
 
     public MainWindow()
     {
         InitializeComponent();
+        DataContext = _viewModel;
     }
 
     private void FolderPickerButton_OnClick(object sender, RoutedEventArgs e)
@@ -39,24 +41,24 @@ public partial class MainWindow : Window
 
         if (!folderPicker.FolderName.IsNullOrEmpty())
         {
-            tbxChoosenFolderPath.Text = folderPicker.FolderName;
+            _viewModel.ChosenFolderPath = folderPicker.FolderName;
         }
-        
-        lblPdfAmountValue.Content = GetFolderPdfs(tbxChoosenFolderPath.Text).Count();
+
+        _viewModel.PdfAmountValue = GetFolderPdfs(_viewModel.ChosenFolderPath).Count().ToString();
     }
 
     private void AddToFolderList_OnClick(object sender, RoutedEventArgs e)
     {
-        if (tbxChoosenFolderPath.Text.IsNullOrEmpty())
+        if (_viewModel.ChosenFolderPath.IsNullOrEmpty())
             return;
 
-        if (!Directory.Exists(tbxChoosenFolderPath.Text))
+        if (!Directory.Exists(_viewModel.ChosenFolderPath))
             return;
 
-        if (lboAddedFolders.Items.Contains(tbxChoosenFolderPath.Text))
+        if (lboAddedFolders.Items.Contains(_viewModel.ChosenFolderPath))
             return;
 
-        lboAddedFolders.Items.Add(tbxChoosenFolderPath.Text);
+        lboAddedFolders.Items.Add(_viewModel.ChosenFolderPath);
 
         UpdatePdfList();
     }
@@ -81,42 +83,38 @@ public partial class MainWindow : Window
 
     private void UpdatePdfList()
     {
-        var obtainedPdfs = GetFolderPdfs(tbxChoosenFolderPath.Text, 0);
+        var obtainedPdfs = GetFolderPdfs(_viewModel.ChosenFolderPath, 0);
 
         foreach (var obtainedPdf in obtainedPdfs.Where(obtainedPdf => !lboAddedPdfs.Items.Contains(obtainedPdf)))
         {
             lboAddedPdfs.Items.Add(obtainedPdf);
         }
 
-        pbFilesCompleted.Maximum = lboAddedPdfs.Items.Count;
+        _viewModel.FilesCompletedMaximum = lboAddedPdfs.Items.Count;
     }
 
     private async void BtnStartSearch_OnClick(object sender, RoutedEventArgs e)
     {
-        if (tboSearchText.Text.IsNullOrEmpty() || tboSearchText.Text.IsNullOrWhiteSpace())
+        if (_viewModel.SearchText.IsNullOrEmpty() || _viewModel.SearchText.IsNullOrWhiteSpace())
             return;
 
-        if (isSearching)
+        if (_isSearching)
             return;
 
-        (sender as Button)!.Visibility = Visibility.Hidden;
+        _viewModel.StartTextSearchingButton = Visibility.Hidden;
 
         _cts?.Dispose();
         _cts = new();
 
-        isSearching = true;
+        _isSearching = true;
 
-        var textToSearch = tboSearchText.Text;
+        var textToSearch = _viewModel.SearchText;
 
         if (textToSearch.IsNullOrEmpty())
             return;
 
-        pbFilesCompleted.Value = 0;
-
-        await Application.Current.Dispatcher.InvokeAsync(() =>
-        {
-            dgrFoundOccurrences.Items.Clear();
-        });
+        _viewModel.FilesCompleted = 0;
+        _viewModel.FoundOccurrences.Clear();
 
         var pdfPaths = lboAddedPdfs.Items.Cast<string>().ToList();
 
@@ -134,11 +132,9 @@ public partial class MainWindow : Window
         }
         finally
         {
-            isSearching = false;
-            
-            (sender as Button)!.IsEnabled = true;
+            _isSearching = false;
+            _viewModel.StartTextSearchingButton = Visibility.Visible;
         }
-
     }
 
     private async Task ProcessPdfFile(string pdfPath, string textToSearch)
@@ -147,38 +143,24 @@ public partial class MainWindow : Window
             return;
 
         using var pdf = new PdfReader(pdfPath);
-        
-        await Application.Current.Dispatcher.InvokeAsync(() =>
-        {
-            pbFileCompleted.Maximum = pdf.NumberOfPages;
-            pbFileCompleted.Value = 1;
-        });
+
+        _viewModel.CurrentFileCompletedMaximum = pdf.NumberOfPages;
+        _viewModel.CurrentFileCompleted = 1;
 
         var fileName = Path.GetFileName(pdfPath);
         
-        await Application.Current.Dispatcher.InvokeAsync(() =>
-        {
-            CurrentFileWorkLabel.Content = $"{fileName}  |  {pdf.NumberOfPages} p";
-        });
+        _viewModel.CurrentFileWorkLabel = $"{fileName}  |  {pdf.NumberOfPages} p";
 
         var handledPage = 1;
         while (!_cts.IsCancellationRequested && handledPage < pdf.NumberOfPages)
         {
             await SearchPdfPage(pdf, handledPage, textToSearch, fileName);
             handledPage++;
-            await Application.Current.Dispatcher.InvokeAsync(() =>
-            {
-                pbFileCompleted.Value += 1;
-            });
+
+            _viewModel.CurrentFileCompleted++;
         }
 
-        await Application.Current.Dispatcher.InvokeAsync(() =>
-        {
-            _foundOccurrences.ForEach(x => dgrFoundOccurrences.Items.Add(x));
-            pbFilesCompleted.Value += 1;
-        });
-        
-        _foundOccurrences.Clear();
+        _viewModel.FilesCompleted++;
     }
 
     private Task SearchPdfPage(PdfReader pdf, int pageNumber, string textToSearch, string fileName)
@@ -188,27 +170,34 @@ public partial class MainWindow : Window
         
         var extractedText = PdfTextExtractor.GetTextFromPage(pdf, pageNumber);
 
-        _foundOccurrences.AddRange(
-            extractedText
-                .Split(new[] { ".", "\n", Environment.NewLine }, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
-                .AsParallel()
-                .Where(sentence => sentence.Contains(textToSearch))
-                .Select(x => new TextOccurenceModel
-                {
-                    BookName = fileName,
-                    FoundOnPage = pageNumber,
-                    Sentence = x.Trim()
-                })
-        );
+        var query = extractedText
+            .Split(new[] { ".", "\n", Environment.NewLine }, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            .Where(sentence => sentence.Contains(textToSearch))
+            .Select(x => new TextOccurenceModel
+            {
+                BookName = fileName,
+                FoundOnPage = pageNumber,
+                Sentence = x.Trim()
+            })
+            .AsParallel();
+
+        Application.Current.Dispatcher.InvokeAsync(() =>
+        {
+            foreach (var value in query.TakeWhile(_ => !_cts.IsCancellationRequested))
+            {
+                _viewModel.FoundOccurrences.Add(value);
+            }
+        });
+        
         return Task.CompletedTask;
     }
 
     private void BtnCancelSearch_OnClick(object sender, RoutedEventArgs e)
     {
         _cts?.Cancel();
-        isSearching = false;
+        _isSearching = false;
         
-        btnStartSearch.Visibility = Visibility.Visible;
+        _viewModel.StartTextSearchingButton = Visibility.Visible;
     }
 
     private void BtnExportToCsv_OnClick(object sender, RoutedEventArgs e)
@@ -216,7 +205,7 @@ public partial class MainWindow : Window
         if (dgrFoundOccurrences.Items.IsEmpty)
             return;
 
-        if (isSearching)
+        if (_isSearching)
             return;
 
         var saveFileDialog = new SaveFileDialog
