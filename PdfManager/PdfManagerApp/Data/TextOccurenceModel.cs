@@ -1,6 +1,6 @@
 ﻿using CsvHelper.Configuration;
 
-namespace PdfManagerApp.Models;
+namespace PdfManagerApp.Data;
 
 public class TextOccurenceModel
 {

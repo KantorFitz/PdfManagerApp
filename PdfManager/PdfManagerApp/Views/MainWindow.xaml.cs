@@ -44,7 +44,7 @@ public partial class MainWindow : Window
             _viewModel.ChosenFolderPath = folderPicker.FolderName;
         }
 
-        _viewModel.PdfAmountValue = GetFolderPdfs(_viewModel.ChosenFolderPath).Count().ToString();
+        _viewModel.PdfAmountValue = FilesOperationsHelper.GetFolderPdfs(_viewModel.ChosenFolderPath).Count().ToString();
     }
 
     private void AddToFolderList_OnClick(object sender, RoutedEventArgs e)
@@ -63,27 +63,9 @@ public partial class MainWindow : Window
         UpdatePdfList();
     }
 
-    private static IEnumerable<string> GetFolderPdfs(string path, byte scanLevel = 0)
-    {
-        var dirInfo = new DirectoryInfo(path);
-
-        if (!dirInfo.Exists)
-            return new List<string>();
-
-        var pdfs = dirInfo.EnumerateFiles("*.pdf", new EnumerationOptions
-            {
-                RecurseSubdirectories = true,
-                MaxRecursionDepth = scanLevel,
-            })
-            .AsParallel()
-            .Select(x => x.FullName);
-
-        return pdfs;
-    }
-
     private void UpdatePdfList()
     {
-        var obtainedPdfs = GetFolderPdfs(_viewModel.ChosenFolderPath, 0);
+        var obtainedPdfs = FilesOperationsHelper.GetFolderPdfs(_viewModel.ChosenFolderPath, 0);
 
         foreach (var obtainedPdf in obtainedPdfs.Where(obtainedPdf => !lboAddedPdfs.Items.Contains(obtainedPdf)))
         {
@@ -151,11 +133,9 @@ public partial class MainWindow : Window
         
         _viewModel.CurrentFileWorkLabel = $"{fileName}  |  {pdf.NumberOfPages} p";
 
-        var handledPage = 1;
-        while (!_cts.IsCancellationRequested && handledPage < pdf.NumberOfPages)
+        while (!_cts.IsCancellationRequested && _viewModel.CurrentFileCompleted < pdf.NumberOfPages)
         {
-            await SearchPdfPage(pdf, handledPage, textToSearch, fileName);
-            handledPage++;
+            await SearchPdfPage(pdf, _viewModel.CurrentFileCompleted, textToSearch, fileName);
 
             _viewModel.CurrentFileCompleted++;
         }
@@ -208,17 +188,7 @@ public partial class MainWindow : Window
         if (_isSearching)
             return;
 
-        var saveFileDialog = new SaveFileDialog
-        {
-            Title = "Zapis do pliku CSV",
-            Filter = "Plik CSV (*.csv)|*.csv",
-            DefaultExt = ".csv",
-            AddExtension = true,
-        };
-
-        saveFileDialog.ShowDialog(this);
-
-        var savePath = saveFileDialog.FileName;
+        var savePath = FilesOperationsHelper.ShowSaveFileDialog("Zapis do pliku CSV", ".csv", "Plik CSV (*.csv)|*.csv");
 
         if (savePath.IsNullOrEmpty())
             return;
