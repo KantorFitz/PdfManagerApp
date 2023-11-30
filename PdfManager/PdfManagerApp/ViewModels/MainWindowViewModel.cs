@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using PdfManagerApp.Data;
 using PdfManagerApp.Models;
 
 namespace PdfManagerApp.ViewModels;

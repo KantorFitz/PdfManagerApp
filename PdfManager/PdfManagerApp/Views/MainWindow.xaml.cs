@@ -2,13 +2,13 @@
 using System.IO;
 using System.Text;
 using System.Windows;
-using System.Windows.Controls;
 using CsvHelper;
 using CsvHelper.Configuration;
 using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
 using Microsoft.Win32;
-using PdfManagerApp.Models;
+using PdfManagerApp.Data;
+using PdfManagerApp.Helpers;
 using PdfManagerApp.ViewModels;
 using Path = System.IO.Path;
 
@@ -23,11 +23,14 @@ public partial class MainWindow : Window
 
     private bool _isSearching;
     private readonly MainWindowViewModel _viewModel = new();
+    private readonly SettingsWindowViewModel _settingsViewModel;
 
     public MainWindow()
     {
         InitializeComponent();
         DataContext = _viewModel;
+
+        _settingsViewModel = new SettingsWindowViewModel();
     }
 
     private void FolderPickerButton_OnClick(object sender, RoutedEventArgs e)
@@ -209,5 +212,11 @@ public partial class MainWindow : Window
         csv.WriteHeader<TextOccurenceModel>();
         csv.NextRecord();
         csv.WriteRecords(dataToSave);
+    }
+
+    private void ShowSettingsButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        var settingsWindow = new SettingsWindow(_settingsViewModel);
+        settingsWindow.Show();
     }
 }

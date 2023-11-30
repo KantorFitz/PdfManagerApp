@@ -17,10 +17,12 @@
             </Grid.ColumnDefinitions>
 
             <Button Name="btnFolderPicker" Content="Wybierz folder" Grid.Column="0" HorizontalAlignment="Left" Margin="10 0 0 0" Click="FolderPickerButton_OnClick" />
-            <TextBox x:Name="ChosenFolderPath" Text="{Binding ChosenFolderPath}" Grid.Column="1" Foreground="Tan" IsEnabled="False" Background="White" />
-            <Button Name="btnAddToFolderList" Content="Dodaj do listy" Grid.Column="2" HorizontalAlignment="Center" Click="AddToFolderList_OnClick" />
-            <Label Name="lblPdfAmount" Content="Ilość Pdf:" Grid.Column="3" HorizontalAlignment="Right" />
-            <Label x:Name="PdfAmountValue" Content="{Binding PdfAmountValue}" Grid.Column="4" HorizontalAlignment="Left" />
+            <Button x:Name="ShowSettingsButton" Grid.Column="1" Content="Ustawienia" Click="ShowSettingsButton_OnClick" />
+
+            <!-- <TextBox x:Name="ChosenFolderPath" Text="{Binding ChosenFolderPath}" Grid.Column="1" Foreground="Tan" IsEnabled="False" Background="White" /> -->
+            <!-- <Button Name="btnAddToFolderList" Content="Dodaj do listy" Grid.Column="2" HorizontalAlignment="Center" Click="AddToFolderList_OnClick" /> -->
+            <!-- <Label Name="lblPdfAmount" Content="Ilość Pdf:" Grid.Column="3" HorizontalAlignment="Right" /> -->
+            <!-- <Label x:Name="PdfAmountValue" Content="{Binding PdfAmountValue}" Grid.Column="4" HorizontalAlignment="Left" /> -->
         </Grid>
 
         <Grid>
