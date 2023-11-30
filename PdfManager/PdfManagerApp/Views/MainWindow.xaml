@@ -7,17 +7,17 @@
         xmlns:rs="clr-namespace:PdfManagerApp.Localization"
         Title="MainWindow" Height="450" Width="800">
     <StackPanel>
-        <Grid Margin="0 10">
+        <Grid Margin="5">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="1*" />
-                <ColumnDefinition Width="4*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
+                <!-- <ColumnDefinition Width="4*" /> -->
+                <!-- <ColumnDefinition Width="*" /> -->
+                <!-- <ColumnDefinition Width="*" /> -->
+                <!-- <ColumnDefinition Width="*" /> -->
             </Grid.ColumnDefinitions>
 
-            <Button Name="btnFolderPicker" Content="Wybierz folder" Grid.Column="0" HorizontalAlignment="Left" Margin="10 0 0 0" Click="FolderPickerButton_OnClick" />
-            <Button x:Name="ShowSettingsButton" Grid.Column="1" Content="Ustawienia" Click="ShowSettingsButton_OnClick" />
+            <!-- <Button Name="btnFolderPicker" Content="Wybierz folder" Grid.Column="0" HorizontalAlignment="Left" Margin="10 0 0 0" Click="FolderPickerButton_OnClick" /> -->
+            <Button x:Name="ShowSettingsButton" Grid.Column="0" Content="Ustawienia" Click="ShowSettingsButton_OnClick" />
 
             <!-- <TextBox x:Name="ChosenFolderPath" Text="{Binding ChosenFolderPath}" Grid.Column="1" Foreground="Tan" IsEnabled="False" Background="White" /> -->
             <!-- <Button Name="btnAddToFolderList" Content="Dodaj do listy" Grid.Column="2" HorizontalAlignment="Center" Click="AddToFolderList_OnClick" /> -->
@@ -25,15 +25,15 @@
             <!-- <Label x:Name="PdfAmountValue" Content="{Binding PdfAmountValue}" Grid.Column="4" HorizontalAlignment="Left" /> -->
         </Grid>
 
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="3*"/>
-            </Grid.ColumnDefinitions>
+        <!-- <Grid> -->
+            <!-- <Grid.ColumnDefinitions> -->
+                <!-- <ColumnDefinition Width="2*"/> -->
+                <!-- <ColumnDefinition Width="3*"/> -->
+            <!-- </Grid.ColumnDefinitions> -->
 
-            <ListBox Grid.Column="0" Name="lboAddedFolders" Height="100" />
-            <ListBox Grid.Column="1" Name="lboAddedPdfs" Height="100" />
-        </Grid>
+            <!-- <ListBox Grid.Column="0" Name="lboAddedFolders" Height="100" /> -->
+            <!-- <ListBox Grid.Column="1" Name="lboAddedPdfs" Height="100" /> -->
+        <!-- </Grid> -->
 
         <Grid Margin="0 20">
             <Grid.ColumnDefinitions>
@@ -57,7 +57,7 @@
 
         </Grid>
         
-        <Grid Height="200">
+        <Grid Height="300">
             <DataGrid x:Name="dgrFoundOccurrences" IsReadOnly="True" ItemsSource="{Binding FoundOccurrences}" AutoGenerateColumns="False">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Nazwa pliku"  Binding="{Binding BookName}"/>

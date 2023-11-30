@@ -50,34 +50,6 @@ public partial class MainWindow : Window
         _viewModel.PdfAmountValue = FilesOperationsHelper.GetFolderPdfs(_viewModel.ChosenFolderPath).Count().ToString();
     }
 
-    private void AddToFolderList_OnClick(object sender, RoutedEventArgs e)
-    {
-        if (_viewModel.ChosenFolderPath.IsNullOrEmpty())
-            return;
-
-        if (!Directory.Exists(_viewModel.ChosenFolderPath))
-            return;
-
-        if (lboAddedFolders.Items.Contains(_viewModel.ChosenFolderPath))
-            return;
-
-        lboAddedFolders.Items.Add(_viewModel.ChosenFolderPath);
-
-        UpdatePdfList();
-    }
-
-    private void UpdatePdfList()
-    {
-        var obtainedPdfs = FilesOperationsHelper.GetFolderPdfs(_viewModel.ChosenFolderPath, 0);
-
-        foreach (var obtainedPdf in obtainedPdfs.Where(obtainedPdf => !lboAddedPdfs.Items.Contains(obtainedPdf)))
-        {
-            lboAddedPdfs.Items.Add(obtainedPdf);
-        }
-
-        _viewModel.FilesCompletedMaximum = lboAddedPdfs.Items.Count;
-    }
-
     private async void BtnStartSearch_OnClick(object sender, RoutedEventArgs e)
     {
         if (_viewModel.SearchText.IsNullOrEmpty() || _viewModel.SearchText.IsNullOrWhiteSpace())
@@ -101,7 +73,10 @@ public partial class MainWindow : Window
         _viewModel.FilesCompleted = 0;
         _viewModel.FoundOccurrences.Clear();
 
-        var pdfPaths = lboAddedPdfs.Items.Cast<string>().ToList();
+        var pdfPaths = _settingsViewModel.Folders
+            .SelectMany(x => x.BooksInFolder.Select(y => y.FileName))
+            .AsParallel()
+            .ToList();
 
         try
         {
