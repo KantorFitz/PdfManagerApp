@@ -1,9 +1,9 @@
-﻿using System.IO;
+﻿using System.ComponentModel;
+using System.IO;
 using System.Windows;
 using Microsoft.Win32;
 using PdfManagerApp.Data;
 using PdfManagerApp.Helpers;
-using PdfManagerApp.Models;
 using PdfManagerApp.ViewModels;
 
 namespace PdfManagerApp.Views;
@@ -17,6 +17,12 @@ public partial class SettingsWindow : Window
         InitializeComponent();
         _viewModel = settingsMV;
         DataContext = _viewModel;
+    }
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        e.Cancel = true;
+        Hide();
     }
 
     private void FolderPickerButton_OnClick(object sender, RoutedEventArgs e)

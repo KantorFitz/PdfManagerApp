@@ -6,7 +6,6 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
-using Microsoft.Win32;
 using PdfManagerApp.Data;
 using PdfManagerApp.Helpers;
 using PdfManagerApp.ViewModels;
@@ -22,32 +21,18 @@ public partial class MainWindow : Window
     private CancellationTokenSource _cts;
 
     private bool _isSearching;
-    private readonly MainWindowViewModel _viewModel = new();
-    private readonly SettingsWindowViewModel _settingsViewModel;
+    private readonly MainWindowViewModel _viewModel;
+    private readonly SettingsWindow _settingsWindow;
+    private readonly SettingsWindowViewModel _settingsWindowViewModel;
 
-    public MainWindow()
+    public MainWindow(MainWindowViewModel viewModel, SettingsWindow settingsWindow, SettingsWindowViewModel settingsWindowViewModel)
     {
         InitializeComponent();
+
+        _viewModel = viewModel;
+        _settingsWindow = settingsWindow;
+        _settingsWindowViewModel = settingsWindowViewModel;
         DataContext = _viewModel;
-
-        _settingsViewModel = new SettingsWindowViewModel();
-    }
-
-    private void FolderPickerButton_OnClick(object sender, RoutedEventArgs e)
-    {
-        var folderPicker = new OpenFolderDialog
-        {
-            Title = "Wybierz folder zawierający pliki PDF",
-        };
-
-        folderPicker.ShowDialog(this);
-
-        if (!folderPicker.FolderName.IsNullOrEmpty())
-        {
-            _viewModel.ChosenFolderPath = folderPicker.FolderName;
-        }
-
-        _viewModel.PdfAmountValue = FilesOperationsHelper.GetFolderPdfs(_viewModel.ChosenFolderPath).Count().ToString();
     }
 
     private async void BtnStartSearch_OnClick(object sender, RoutedEventArgs e)
@@ -73,7 +58,7 @@ public partial class MainWindow : Window
         _viewModel.FilesCompleted = 0;
         _viewModel.FoundOccurrences.Clear();
 
-        var pdfPaths = _settingsViewModel.Folders
+        var pdfPaths = _settingsWindowViewModel.Folders
             .SelectMany(x => x.BooksInFolder.Select(y => y.FileName))
             .AsParallel()
             .ToList();
@@ -178,7 +163,7 @@ public partial class MainWindow : Window
             Delimiter = ";",
             Encoding = new UTF8Encoding(true)
         };
-        
+
         using var writer = new StreamWriter(savePath);
         using var csv = new CsvWriter(writer, csvConfig);
 
@@ -191,7 +176,6 @@ public partial class MainWindow : Window
 
     private void ShowSettingsButton_OnClick(object sender, RoutedEventArgs e)
     {
-        var settingsWindow = new SettingsWindow(_settingsViewModel);
-        settingsWindow.Show();
+        _settingsWindow.Show();
     }
 }
