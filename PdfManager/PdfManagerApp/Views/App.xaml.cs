@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Text;
 using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace PdfManagerApp.Views;
 
@@ -9,15 +10,29 @@ namespace PdfManagerApp.Views;
 /// </summary>
 public partial class App : Application
 {
+    private ServiceProvider serviceProvider;
+
     public App()
     {
+        ServiceCollection services = new ServiceCollection();
+        ConfigureServices(services);
+        serviceProvider = services.BuildServiceProvider();
+        
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
 
-    protected override void OnStartup(StartupEventArgs e)
+    private void ConfigureServices(ServiceCollection services)
+    {
+        
+        services.AddSingleton<MainWindow>();
+    }
+
+    private void OnStartup(object sender, StartupEventArgs e)
     {
         Thread.CurrentThread.CurrentCulture = new CultureInfo("pl");
         Thread.CurrentThread.CurrentUICulture = new CultureInfo("pl");
-        base.OnStartup(e);
+
+        var mainWindow = serviceProvider.GetRequiredService<MainWindow>();
+        mainWindow.Show();
     }
 }
