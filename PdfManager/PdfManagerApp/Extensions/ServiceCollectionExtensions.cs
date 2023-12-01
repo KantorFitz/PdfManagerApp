@@ -9,7 +9,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection RegisterViews(this IServiceCollection services)
     {
         services.AddSingleton<MainWindow>();
-        services.AddSingleton<SettingsWindow>();
+        services.AddScoped<SettingsWindow>();
 
         return services;
     }

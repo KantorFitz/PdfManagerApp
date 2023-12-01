@@ -1,9 +1,11 @@
 ﻿using System.Globalization;
 using System.Text;
 using System.Windows;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using PdfManagerApp.Extensions;
 using PdfManagerApp.Infrastructure;
+using PdfManagerApp.ViewModels;
 
 namespace PdfManagerApp.Views;
 
@@ -38,6 +40,10 @@ public partial class App : Application
 
         var dbContext = serviceProvider.GetRequiredService<DatabaseContext>();
         dbContext.Database.EnsureCreated();
+        dbContext.Folders.Include(x=>x.BookDetails).Load();
+
+        var savedFoldersMv = serviceProvider.GetRequiredService<SettingsWindowViewModel>();
+        savedFoldersMv.Folders = dbContext.Folders.Local.ToObservableCollection();
 
         var mainWindow = serviceProvider.GetRequiredService<MainWindow>();
         mainWindow.Show();

@@ -6,6 +6,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
+using Microsoft.Extensions.DependencyInjection;
 using PdfManagerApp.Data;
 using PdfManagerApp.Helpers;
 using PdfManagerApp.ViewModels;
@@ -22,16 +23,16 @@ public partial class MainWindow : Window
 
     private bool _isSearching;
     private readonly MainWindowViewModel _viewModel;
-    private readonly SettingsWindow _settingsWindow;
     private readonly SettingsWindowViewModel _settingsWindowViewModel;
+    private readonly IServiceProvider _sp;
 
-    public MainWindow(MainWindowViewModel viewModel, SettingsWindow settingsWindow, SettingsWindowViewModel settingsWindowViewModel)
+    public MainWindow(MainWindowViewModel viewModel, SettingsWindowViewModel settingsWindowViewModel, IServiceProvider sp)
     {
         InitializeComponent();
 
         _viewModel = viewModel;
-        _settingsWindow = settingsWindow;
         _settingsWindowViewModel = settingsWindowViewModel;
+        _sp = sp;
         DataContext = _viewModel;
     }
 
@@ -59,7 +60,7 @@ public partial class MainWindow : Window
         _viewModel.FoundOccurrences.Clear();
 
         var pdfPaths = _settingsWindowViewModel.Folders
-            .SelectMany(x => x.BooksInFolder.Select(y => y.FileName))
+            .SelectMany(x => x.BookDetails.Select(y => y.FileName))
             .AsParallel()
             .ToList();
 
@@ -176,6 +177,9 @@ public partial class MainWindow : Window
 
     private void ShowSettingsButton_OnClick(object sender, RoutedEventArgs e)
     {
-        _settingsWindow.Show();
+        using var scope = _sp.CreateScope();
+        var settingsWindow = scope.ServiceProvider.GetRequiredService<SettingsWindow>();
+
+        settingsWindow.ShowDialog();
     }
 }

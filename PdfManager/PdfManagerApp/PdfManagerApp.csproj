@@ -19,6 +19,7 @@
         <PackageReference Include="Verticular.Extensions.Strings" Version="1.0.1" />
         <PackageReference Include="iTextSharp" Version="5.5.13.3" />
         <PackageReference Include="PdfPig" Version="0.1.8" />
+        <PackageReference Include="Z.EntityFramework.Extensions.EFCore" Version="8.101.1" />
     </ItemGroup>
     
     <ItemGroup>

@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using PdfManagerApp.Data;
+using PdfManagerApp.Domain.Entities;
 using PdfManagerApp.Models;
 
 namespace PdfManagerApp.ViewModels;
@@ -40,7 +41,7 @@ public class SettingsWindowViewModel : SettingsWindowModel, INotifyPropertyChang
         set => SetField(ref _pdfAmountValue, value);
     }
 
-    public ObservableCollection<FolderWithBooksModel> Folders
+    public ObservableCollection<Folder> Folders
     {
         get => _folders;
         set => SetField(ref _folders, value);

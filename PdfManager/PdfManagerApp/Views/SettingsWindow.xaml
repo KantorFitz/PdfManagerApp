@@ -3,8 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:local="clr-namespace:PdfManagerApp.Views"
-        xmlns:self="clr-namespace:PdfManagerApp.Data"
+        xmlns:entities="clr-namespace:PdfManagerApp.Domain.Entities;assembly=PdfManagerApp.Domain"
         mc:Ignorable="d"
         Title="SettingsWindow" Height="350" Width="800"
         ResizeMode="NoResize">
@@ -43,16 +42,16 @@
             <TreeView x:Name="BooksTreeView" ItemsSource="{Binding Folders}" Margin="3 0 3 0">
                 <TreeView.Resources>
 
-                    <HierarchicalDataTemplate DataType="{x:Type self:FolderWithBooksModel}" ItemsSource="{Binding BooksInFolder}">
+                    <HierarchicalDataTemplate DataType="{x:Type entities:Folder}" ItemsSource="{Binding BookDetails}">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding FolderPath}" />
+                            <TextBlock Text="{Binding AbsolutePath}" />
                             <TextBlock Text=" [" Foreground="Blue" />
-                            <TextBlock Text="{Binding BooksInFolder.Count}" Foreground="Blue" />
+                            <TextBlock Text="{Binding PdfAmount}" Foreground="Blue" />
                             <TextBlock Text=" files]" Foreground="Blue" />
                         </StackPanel>
                     </HierarchicalDataTemplate>
 
-                    <DataTemplate DataType="{x:Type self:BookDetailInfo}">
+                    <DataTemplate DataType="{x:Type entities:BookDetail}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="{Binding Title}" />
                             <TextBlock Text=" (" Foreground="Green" />

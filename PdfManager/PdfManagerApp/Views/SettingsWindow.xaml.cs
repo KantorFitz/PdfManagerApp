@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel;
-using System.IO;
 using System.Windows;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Win32;
-using PdfManagerApp.Data;
+using PdfManagerApp.Domain.Entities;
 using PdfManagerApp.Helpers;
+using PdfManagerApp.Infrastructure;
 using PdfManagerApp.ViewModels;
 
 namespace PdfManagerApp.Views;
@@ -11,18 +12,24 @@ namespace PdfManagerApp.Views;
 public partial class SettingsWindow : Window
 {
     private SettingsWindowViewModel _viewModel;
+    private readonly DatabaseContext _dbContext;
 
-    public SettingsWindow(SettingsWindowViewModel settingsMV)
+    public SettingsWindow(SettingsWindowViewModel settingsMv, DatabaseContext dbContext)
     {
         InitializeComponent();
-        _viewModel = settingsMV;
+        _dbContext = dbContext;
+
+        _viewModel = settingsMv;
         DataContext = _viewModel;
     }
 
-    protected override void OnClosing(CancelEventArgs e)
+    private async Task UpdateDatabase()
     {
-        e.Cancel = true;
-        Hide();
+        await _dbContext.Folders.ExecuteDeleteAsync();
+
+        await _dbContext.AddRangeAsync(_viewModel.Folders);
+        
+        await _dbContext.SaveChangesAsync();
     }
 
     private void FolderPickerButton_OnClick(object sender, RoutedEventArgs e)
@@ -44,38 +51,37 @@ public partial class SettingsWindow : Window
 
     private void AddToFolderList_OnClick(object sender, RoutedEventArgs e)
     {
-        if (_viewModel.ChosenFolderPath.IsNullOrEmpty())
-            return;
-
-        if (!Directory.Exists(_viewModel.ChosenFolderPath))
-            return;
-
-        if (_viewModel.Folders.Any(x => x.FolderPath == _viewModel.ChosenFolderPath))
-            return;
-
-        UpdatePdfList(_viewModel.ChosenFolderPath);
+        // if (_viewModel.ChosenFolderPath.IsNullOrEmpty())
+        //     return;
+        //
+        // if (!Directory.Exists(_viewModel.ChosenFolderPath))
+        //     return;
+        //
+        // if (_viewModel.Folders.Any(x => x.FolderPath == _viewModel.ChosenFolderPath))
+        //     return;
+        //
+        // UpdatePdfList(_viewModel.ChosenFolderPath);
     }
 
-    private void UpdatePdfList(string path)
-    {
-        var obtainedPdfs = FilesOperationsHelper.GetFolderPdfs(path);
-
-        Application.Current.Dispatcher.InvokeAsync(async () =>
-        {
-            var folderToAdd = new FolderWithBooksModel
-            {
-                FolderPath = _viewModel.ChosenFolderPath,
-                BooksInFolder = new()
-            };
-
-            _viewModel.Folders.Add(folderToAdd);
-
-            foreach (var obtainedPdf in obtainedPdfs)
-            {
-                folderToAdd.BooksInFolder.Add(await FilesOperationsHelper.GetBookDetailedInfo(obtainedPdf));
-            }
-        });
-    }
+    // private void UpdatePdfList(string path)
+    // {
+    //     var obtainedPdfs = FilesOperationsHelper.GetFolderPdfs(path);
+    //
+    //     Application.Current.Dispatcher.InvokeAsync(async () =>
+    //     {
+    //         var folderToAdd = new Folder
+    //         {
+    //             AbsolutePath = _viewModel.ChosenFolderPath,
+    //         };
+    //
+    //         _viewModel.Folders.Add(folderToAdd);
+    //
+    //         foreach (var obtainedPdf in obtainedPdfs)
+    //         {
+    //             folderToAdd.BooksInFolder.Add(await FilesOperationsHelper.GetBookDetailedInfo(obtainedPdf));
+    //         }
+    //     });
+    // }
 
     private async void BtnAddDepthFiles_OnClick(object sender, RoutedEventArgs e)
     {
@@ -86,22 +92,23 @@ public partial class SettingsWindow : Window
         await Task.Run(() => FillList(FilesOperationsHelper.GetFolderPdfsDepth(_viewModel.ChosenFolderPath)));
     }
 
-    private Task FillList(IDictionary<string, List<string>> groupedPdfs)
+    private async Task FillList(IDictionary<string, List<string>> groupedPdfs)
     {
         _viewModel.TotalFoldersCount = groupedPdfs.Count;
         _viewModel.FoldersScanned = 0;
         foreach (var item in groupedPdfs)
         {
-            if (_viewModel.Folders.Any(x => x.FolderPath == item.Key))
+            if (_viewModel.Folders.Any(x => x.AbsolutePath == item.Key))
             {
                 _viewModel.FoldersScanned++;
                 continue;
             }
 
-            var folderToAdd = new FolderWithBooksModel
+            var folderToAdd = new Folder
             {
-                FolderPath = item.Key,
-                BooksInFolder = new()
+                AbsolutePath = item.Key,
+                Id = Guid.NewGuid(),
+                PdfAmount = item.Value.Count
             };
 
             Application.Current.Dispatcher.Invoke(async () =>
@@ -109,13 +116,17 @@ public partial class SettingsWindow : Window
                 _viewModel.Folders.Add(folderToAdd);
 
                 foreach (var pdfPath in item.Value)
-                    folderToAdd.BooksInFolder.Add(await FilesOperationsHelper.GetBookDetailedInfo(pdfPath));
+                {
+                    var bookDetail = FilesOperationsHelper.GetBookDetailEntity(pdfPath, folderToAdd.Id);
+
+                    folderToAdd.BookDetails.Add(bookDetail);
+                }
             });
 
             _viewModel.FoldersScanned++;
         }
 
+        await UpdateDatabase();
         _viewModel.DepthSearchEnabled = true;
-        return Task.CompletedTask;
     }
 }

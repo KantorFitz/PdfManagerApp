@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using iTextSharp.text.pdf;
 using Microsoft.Win32;
-using PdfManagerApp.Data;
+using PdfManagerApp.Domain.Entities;
 using PdfDocument = UglyToad.PdfPig.PdfDocument;
 
 namespace PdfManagerApp.Helpers;
@@ -62,34 +62,33 @@ public static class FilesOperationsHelper
         return saveFileDialog.FileName;
     }
 
-    public static async Task<BookDetailInfo> GetBookDetailedInfo(string path)
+    public static BookDetail GetBookDetailEntity(string path, Guid folderId)
     {
-        return await Task.Run(() =>
+        PdfDocument? pdf = null;
+        try
         {
-            PdfDocument? pdf = null;
-            try
-            {
-                pdf = PdfDocument.Open(path);
+            pdf = PdfDocument.Open(path);
 
-                return new BookDetailInfo
-                {
-                    FileName = path,
-                    NumberOfPages = pdf.NumberOfPages,
-                    Title = Path.GetFileName(path)
-                };
-            }
-            catch (Exception)
+            return new BookDetail
             {
-                return new BookDetailInfo
-                {
-                    FileName = path,
-                    Title = Path.GetFileName(path)
-                };
-            }
-            finally
+                FolderId = folderId,
+                FileName = path,
+                NumberOfPages = pdf.NumberOfPages,
+                Title = Path.GetFileName(path)
+            };
+        }
+        catch (Exception)
+        {
+            return new BookDetail
             {
-                pdf?.Dispose();
-            }
-        });
+                FolderId = folderId,
+                FileName = path,
+                Title = Path.GetFileName(path)
+            };
+        }
+        finally
+        {
+            pdf?.Dispose();
+        }
     }
 }

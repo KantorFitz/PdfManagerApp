@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
-using System.Windows;
-using PdfManagerApp.Data;
+using PdfManagerApp.Domain.Entities;
 using PdfManagerApp.Localization;
 
 namespace PdfManagerApp.Models;
@@ -13,5 +12,5 @@ public class SettingsWindowModel
     protected int _foldersScanned;
     protected bool _depthSearchEnabled = true;
     
-    protected ObservableCollection<FolderWithBooksModel> _folders = new();
+    protected ObservableCollection<Folder> _folders = new();
 }
