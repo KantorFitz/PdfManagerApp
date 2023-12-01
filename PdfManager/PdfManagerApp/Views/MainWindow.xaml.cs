@@ -180,6 +180,8 @@ public partial class MainWindow : Window
         using var scope = _sp.CreateScope();
         var settingsWindow = scope.ServiceProvider.GetRequiredService<SettingsWindow>();
 
+        settingsWindow.Owner = this;
+
         settingsWindow.ShowDialog();
     }
 }
