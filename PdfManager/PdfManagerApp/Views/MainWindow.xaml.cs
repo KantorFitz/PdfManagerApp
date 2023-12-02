@@ -121,7 +121,7 @@ public partial class MainWindow : Window
             {
                 BookName = fileName,
                 FoundOnPage = pageNumber,
-                Sentence = x.Trim()
+                Sentence = x.Trim().Replace(textToSearch, $"<Bold>{textToSearch}</Bold>")
             })
             .AsParallel();
 

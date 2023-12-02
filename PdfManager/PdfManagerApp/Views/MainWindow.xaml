@@ -4,9 +4,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        xmlns:rs="clr-namespace:PdfManagerApp.Localization"
-        xmlns:entities="clr-namespace:PdfManagerApp.Domain.Entities;assembly=PdfManagerApp.Domain"
-        xmlns:data="clr-namespace:PdfManagerApp.Data"
+        xmlns:uc="clr-namespace:PdfManagerApp.CustomControls"
+        xmlns:customControls="clr-namespace:PdfManagerApp.CustomControls"
         Title="MainWindow" Height="450" Width="800">
     <StackPanel>
         <Grid Margin="5">
@@ -43,7 +42,17 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Nazwa pliku"  Binding="{Binding BookName}"/>
                     <DataGridTextColumn Header="Numer strony" Binding="{Binding FoundOnPage}"/>
-                    <DataGridTextColumn Header="Zdanie z zawartością" Binding="{Binding Sentence}"/>
+                    
+                    <DataGridTemplateColumn Header="Zdanie z zawartością">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                
+                                <uc:HtmlTextBlock HtmlText="{Binding Sentence}" />
+
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>
