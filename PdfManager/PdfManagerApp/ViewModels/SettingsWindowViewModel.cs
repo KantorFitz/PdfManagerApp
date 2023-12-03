@@ -11,7 +11,7 @@ public class SettingsWindowViewModel : SettingsWindowModel, INotifyPropertyChang
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public bool DepthSearchEnabled
+    public bool DepthSearchEnabled // TODO[2023-12-03 12:24:09]: change it to IsSearchEnabled
     {
         get => _depthSearchEnabled;
         set => SetField(ref _depthSearchEnabled, value);
