@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.IO;
 using System.Windows;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Win32;
@@ -49,46 +50,60 @@ public partial class SettingsWindow : Window
         _viewModel.PdfAmountValue = FilesOperationsHelper.GetFolderPdfs(_viewModel.ChosenFolderPath).Count().ToString();
     }
 
-    private void AddToFolderList_OnClick(object sender, RoutedEventArgs e)
+    private async void AddToFolderList_OnClick(object sender, RoutedEventArgs e)
     {
-        // if (_viewModel.ChosenFolderPath.IsNullOrEmpty())
-        //     return;
-        //
-        // if (!Directory.Exists(_viewModel.ChosenFolderPath))
-        //     return;
-        //
-        // if (_viewModel.Folders.Any(x => x.FolderPath == _viewModel.ChosenFolderPath))
-        //     return;
-        //
-        // UpdatePdfList(_viewModel.ChosenFolderPath);
+        if (_viewModel.ChosenFolderPath.IsNullOrEmpty())
+            return;
+        
+        if (!Directory.Exists(_viewModel.ChosenFolderPath))
+            return;
+        
+        if (_viewModel.Folders.Any(x => x.AbsolutePath == _viewModel.ChosenFolderPath))
+            return;
+        
+        await UpdatePdfList(_viewModel.ChosenFolderPath);
     }
 
-    // private void UpdatePdfList(string path)
-    // {
-    //     var obtainedPdfs = FilesOperationsHelper.GetFolderPdfs(path);
-    //
-    //     Application.Current.Dispatcher.InvokeAsync(async () =>
-    //     {
-    //         var folderToAdd = new Folder
-    //         {
-    //             AbsolutePath = _viewModel.ChosenFolderPath,
-    //         };
-    //
-    //         _viewModel.Folders.Add(folderToAdd);
-    //
-    //         foreach (var obtainedPdf in obtainedPdfs)
-    //         {
-    //             folderToAdd.BooksInFolder.Add(await FilesOperationsHelper.GetBookDetailedInfo(obtainedPdf));
-    //         }
-    //     });
-    // }
+    private async Task UpdatePdfList(string path)
+    {
+        _viewModel.CanPerformFilesSearch = false;
+        _viewModel.TotalFoldersCount = 1;
+        _viewModel.FoldersScanned = 0;
+        
+        var obtainedPdfs = FilesOperationsHelper.GetFolderPdfs(path).ToList();
+
+        await Task.Run(async () =>
+        {
+            var folderToAdd = new Folder
+            {
+                AbsolutePath = _viewModel.ChosenFolderPath,
+                Id = Guid.NewGuid(),
+                PdfAmount = obtainedPdfs.Count
+            };
+
+            Application.Current.Dispatcher.InvokeAsync(() => { _viewModel.Folders.Add(folderToAdd); });
+
+            foreach (var pdfPath in obtainedPdfs)
+            {
+                var bookDetail = await FilesOperationsHelper.GetBookDetailedEntityAsync(pdfPath, folderToAdd.Id);
+
+                Application.Current.Dispatcher.InvokeAsync(() => { folderToAdd.BookDetails.Add(bookDetail); });
+            }
+            
+            await UpdateDatabase();
+            _viewModel.CanPerformFilesSearch = true;
+        });
+    }
 
     private async void BtnAddDepthFiles_OnClick(object sender, RoutedEventArgs e)
     {
         if (_viewModel.ChosenFolderPath.IsNullOrEmpty())
             return;
+        
+        if (!Directory.Exists(_viewModel.ChosenFolderPath))
+            return;
 
-        _viewModel.DepthSearchEnabled = false;
+        _viewModel.CanPerformFilesSearch = false;
         await FillList(FilesOperationsHelper.GetFolderPdfsDepth(_viewModel.ChosenFolderPath));
     }
 
@@ -127,7 +142,7 @@ public partial class SettingsWindow : Window
             }
 
             await UpdateDatabase();
-            _viewModel.DepthSearchEnabled = true;
+            _viewModel.CanPerformFilesSearch = true;
         });
     }
 }

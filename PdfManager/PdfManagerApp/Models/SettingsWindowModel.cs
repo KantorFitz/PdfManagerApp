@@ -10,7 +10,7 @@ public class SettingsWindowModel
     protected string _pdfAmountValue = "...";
     protected int _totalFoldersCount = 1;
     protected int _foldersScanned;
-    protected bool _depthSearchEnabled = true;
+    protected bool _canPerformFilesSearch = true;
     
     protected ObservableCollection<Folder> _folders = new();
 }

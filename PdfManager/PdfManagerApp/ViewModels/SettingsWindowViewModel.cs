@@ -11,10 +11,10 @@ public class SettingsWindowViewModel : SettingsWindowModel, INotifyPropertyChang
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public bool DepthSearchEnabled // TODO[2023-12-03 12:24:09]: change it to IsSearchEnabled
+    public bool CanPerformFilesSearch
     {
-        get => _depthSearchEnabled;
-        set => SetField(ref _depthSearchEnabled, value);
+        get => _canPerformFilesSearch;
+        set => SetField(ref _canPerformFilesSearch, value);
     }
 
     public int TotalFoldersCount
