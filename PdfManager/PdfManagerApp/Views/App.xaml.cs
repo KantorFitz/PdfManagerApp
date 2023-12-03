@@ -39,7 +39,7 @@ public partial class App : Application
         Thread.CurrentThread.CurrentUICulture = new CultureInfo("pl");
 
         var dbContext = serviceProvider.GetRequiredService<DatabaseContext>();
-        dbContext.Database.EnsureCreated();
+        dbContext.Database.Migrate();
         dbContext.Folders.Include(x=>x.BookDetails).Load();
 
         var savedFoldersMv = serviceProvider.GetRequiredService<SettingsWindowViewModel>();
