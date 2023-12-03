@@ -89,44 +89,45 @@ public partial class SettingsWindow : Window
             return;
 
         _viewModel.DepthSearchEnabled = false;
-        await Task.Run(() => FillList(FilesOperationsHelper.GetFolderPdfsDepth(_viewModel.ChosenFolderPath)));
+        await FillList(FilesOperationsHelper.GetFolderPdfsDepth(_viewModel.ChosenFolderPath));
     }
 
     private async Task FillList(IDictionary<string, List<string>> groupedPdfs)
     {
         _viewModel.TotalFoldersCount = groupedPdfs.Count;
         _viewModel.FoldersScanned = 0;
-        foreach (var item in groupedPdfs)
+
+        await Task.Run(async () =>
         {
-            if (_viewModel.Folders.Any(x => x.AbsolutePath == item.Key))
+            foreach (var item in groupedPdfs.OrderBy(x => x.Value.Count))
             {
-                _viewModel.FoldersScanned++;
-                continue;
-            }
+                if (_viewModel.Folders.Any(x => x.AbsolutePath == item.Key))
+                {
+                    _viewModel.FoldersScanned++;
+                    continue;
+                }
 
-            var folderToAdd = new Folder
-            {
-                AbsolutePath = item.Key,
-                Id = Guid.NewGuid(),
-                PdfAmount = item.Value.Count
-            };
+                var folderToAdd = new Folder
+                {
+                    AbsolutePath = item.Key,
+                    Id = Guid.NewGuid(),
+                    PdfAmount = item.Value.Count
+                };
 
-            Application.Current.Dispatcher.Invoke(async () =>
-            {
-                _viewModel.Folders.Add(folderToAdd);
+                Application.Current.Dispatcher.InvokeAsync(() => { _viewModel.Folders.Add(folderToAdd); });
 
                 foreach (var pdfPath in item.Value)
                 {
-                    var bookDetail = FilesOperationsHelper.GetBookDetailEntity(pdfPath, folderToAdd.Id);
+                    var bookDetail = await FilesOperationsHelper.GetBookDetailedEntityAsync(pdfPath, folderToAdd.Id);
 
-                    folderToAdd.BookDetails.Add(bookDetail);
+                    Application.Current.Dispatcher.InvokeAsync(() => { folderToAdd.BookDetails.Add(bookDetail); });
                 }
-            });
 
-            _viewModel.FoldersScanned++;
-        }
+                _viewModel.FoldersScanned++;
+            }
 
-        await UpdateDatabase();
-        _viewModel.DepthSearchEnabled = true;
+            await UpdateDatabase();
+            _viewModel.DepthSearchEnabled = true;
+        });
     }
 }

@@ -62,33 +62,36 @@ public static class FilesOperationsHelper
         return saveFileDialog.FileName;
     }
 
-    public static BookDetail GetBookDetailEntity(string path, Guid folderId)
+    public static async Task<BookDetail> GetBookDetailedEntityAsync(string path, Guid folderId)
     {
-        PdfDocument? pdf = null;
-        try
+        return await Task.Run(() =>
         {
-            pdf = PdfDocument.Open(path);
+            PdfDocument? pdf = null;
+            try
+            {
+                pdf = PdfDocument.Open(path);
 
-            return new BookDetail
+                return new BookDetail
+                {
+                    FolderId = folderId,
+                    FileName = path,
+                    NumberOfPages = pdf.NumberOfPages,
+                    Title = Path.GetFileName(path)
+                };
+            }
+            catch (Exception)
             {
-                FolderId = folderId,
-                FileName = path,
-                NumberOfPages = pdf.NumberOfPages,
-                Title = Path.GetFileName(path)
-            };
-        }
-        catch (Exception)
-        {
-            return new BookDetail
+                return new BookDetail
+                {
+                    FolderId = folderId,
+                    FileName = path,
+                    Title = Path.GetFileName(path)
+                };
+            }
+            finally
             {
-                FolderId = folderId,
-                FileName = path,
-                Title = Path.GetFileName(path)
-            };
-        }
-        finally
-        {
-            pdf?.Dispose();
-        }
+                pdf?.Dispose();
+            }
+        });
     }
 }
