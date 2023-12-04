@@ -20,7 +20,7 @@
             </Grid.ColumnDefinitions>
 
             <Button Name="btnFolderPicker" Content="Wybierz folder" Grid.Column="0" IsEnabled="{Binding CanPerformFilesSearch}" HorizontalAlignment="Left" Margin="10 0 0 0" Click="FolderPickerButton_OnClick" />
-            <TextBox x:Name="ChosenFolderPath" Text="{Binding ChosenFolderPath}" Grid.Column="1" Foreground="Tan" IsEnabled="False" Background="White" />
+            <TextBlock x:Name="ChosenFolderPath" Text="{Binding ChosenFolderPath}" Grid.Column="1" VerticalAlignment="Center" Foreground="Tan" IsEnabled="False" Background="White" />
             <Button Name="btnAddToFolderList" Content="Dodaj do listy" Grid.Column="2" IsEnabled="{Binding CanPerformFilesSearch}" HorizontalAlignment="Center" Click="AddToFolderList_OnClick" />
             <Button x:Name="btnAddDepthFiles" Content="Skanuj wgłąb i dodaj" Grid.Column="3" IsEnabled="{Binding CanPerformFilesSearch}" HorizontalAlignment="Center" Click="BtnAddDepthFiles_OnClick" />
             <Button x:Name="btnRefreshFiles" Content="Odśwież" Grid.Column="4" IsEnabled="False" HorizontalAlignment="Center" />

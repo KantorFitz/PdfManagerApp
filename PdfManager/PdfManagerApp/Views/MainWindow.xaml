@@ -46,7 +46,7 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 
-                                <uc:HtmlTextBlock HtmlText="{Binding Sentence}" />
+                                <TextBlock Text="{Binding Sentence}" />
 
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>

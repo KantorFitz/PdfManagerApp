@@ -8,7 +8,9 @@ using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
 using Microsoft.Extensions.DependencyInjection;
 using PdfManagerApp.Data;
+using PdfManagerApp.Domain.Entities;
 using PdfManagerApp.Helpers;
+using PdfManagerApp.Infrastructure;
 using PdfManagerApp.ViewModels;
 using Path = System.IO.Path;
 
@@ -24,14 +26,16 @@ public partial class MainWindow : Window
     private bool _isSearching;
     private readonly MainWindowViewModel _viewModel;
     private readonly SettingsWindowViewModel _settingsWindowViewModel;
+    private readonly DatabaseContext _context;
     private readonly IServiceProvider _sp;
 
-    public MainWindow(MainWindowViewModel viewModel, SettingsWindowViewModel settingsWindowViewModel, IServiceProvider sp)
+    public MainWindow(MainWindowViewModel viewModel, SettingsWindowViewModel settingsWindowViewModel, IServiceProvider sp, DatabaseContext context)
     {
         InitializeComponent();
 
         _viewModel = viewModel;
         _settingsWindowViewModel = settingsWindowViewModel;
+        _context = context;
         _sp = sp;
         DataContext = _viewModel;
     }
@@ -56,34 +60,62 @@ public partial class MainWindow : Window
         if (textToSearch.IsNullOrEmpty())
             return;
 
+        var searchLog = new SearchLog
+        {
+            CreatedAt = DateTime.UtcNow,
+            SeekedPhrasesJsonList = textToSearch,
+            SearchFinishReason = (int)SearchFinishReason.Unknown
+        };
+        await _context.SearchLogs.AddAsync(searchLog);
+
         _viewModel.FilesCompleted = 0;
         _viewModel.FoundOccurrences.Clear();
 
-        var pdfPaths = _settingsWindowViewModel.Folders
-            .SelectMany(x => x.BookDetails.Select(y => y.FileName))
-            .AsParallel()
-            .ToList();
-
         try
         {
-            foreach (var pdfPath in pdfPaths.TakeWhile(_ => !_cts.IsCancellationRequested))
+            foreach (var folder in _settingsWindowViewModel.Folders.TakeWhile(_ => !_cts.IsCancellationRequested))
             {
-                await Task.Run(() => ProcessPdfFile(pdfPath, textToSearch), _cts.Token);
+                var historicalFolder = new HistoricalFolder
+                {
+                    SearchLogId = searchLog.Id,
+                    AbsolutePath = folder.AbsolutePath,
+                };
+                await _context.HistoricalFolders.AddAsync(historicalFolder);
+
+                foreach (var bookDetail in folder.BookDetails.TakeWhile(_ => !_cts.IsCancellationRequested))
+                {
+                    var historicalBookDetail = new HistoricalBookDetail
+                    {
+                        HistoricalFolderId = historicalFolder.Id,
+                        NumberOfPages = bookDetail.NumberOfPages,
+                        FileNameWithExtension = bookDetail.Title,
+                    };
+                    await _context.HistoricalBookDetails.AddAsync(historicalBookDetail);
+                    
+                    await Task.Run(() => ProcessPdfFile(bookDetail.FileName, textToSearch, historicalBookDetail.Id));
+                }
             }
+            
+            searchLog.SearchFinishReason = (int)SearchFinishReason.FinishedNormally;
         }
         catch (Exception exception)
         {
             await _cts.CancelAsync();
+            searchLog.SearchFinishReason = (int)SearchFinishReason.ExceptionOccured;
             MessageBox.Show(exception.Message, "Error occured");
         }
         finally
         {
+            if (_cts.IsCancellationRequested)
+                searchLog.SearchFinishReason = (int)SearchFinishReason.OperationCancelled;
+
+            await _context.SaveChangesAsync();
             _isSearching = false;
             _viewModel.StartTextSearchingButton = Visibility.Visible;
         }
     }
 
-    private async Task ProcessPdfFile(string pdfPath, string textToSearch)
+    private async Task ProcessPdfFile(string pdfPath, string textToSearch, Guid historicalBookDetailId)
     {
         if (_cts.Token.IsCancellationRequested)
             return;
@@ -99,7 +131,7 @@ public partial class MainWindow : Window
 
         while (!_cts.IsCancellationRequested && _viewModel.CurrentFileCompleted < pdf.NumberOfPages)
         {
-            await SearchPdfPage(pdf, _viewModel.CurrentFileCompleted, textToSearch, fileName);
+            await SearchPdfPage(pdf, _viewModel.CurrentFileCompleted, textToSearch, pdfPath, historicalBookDetailId);
 
             _viewModel.CurrentFileCompleted++;
         }
@@ -107,10 +139,10 @@ public partial class MainWindow : Window
         _viewModel.FilesCompleted++;
     }
 
-    private Task SearchPdfPage(PdfReader pdf, int pageNumber, string textToSearch, string fileName)
+    private async Task SearchPdfPage(PdfReader pdf, int pageNumber, string textToSearch, string fileName, Guid historicalBookDetailId)
     {
         if (_cts.Token.IsCancellationRequested)
-            return Task.CompletedTask;
+            return;
         
         var extractedText = PdfTextExtractor.GetTextFromPage(pdf, pageNumber);
 
@@ -121,24 +153,32 @@ public partial class MainWindow : Window
             {
                 BookName = fileName,
                 FoundOnPage = pageNumber,
-                Sentence = x.Trim().Replace(textToSearch, $"<Bold>{textToSearch}</Bold>")
+                Sentence = x.Trim()
             })
             .AsParallel();
 
-        Application.Current.Dispatcher.InvokeAsync(() =>
-        {
             foreach (var value in query.TakeWhile(_ => !_cts.IsCancellationRequested))
             {
-                _viewModel.FoundOccurrences.Add(value);
+                var searchResult = new SearchResult
+                {
+                    HistoricalBookDetailId = historicalBookDetailId,
+                    FoundOnPage = value.FoundOnPage,
+                    Sentence = value.Sentence
+                };
+
+                await _context.SearchResults.AddAsync(searchResult);
+                
+                Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    _viewModel.FoundOccurrences.Add(value);
+                });
             }
-        });
-        
-        return Task.CompletedTask;
     }
 
-    private void BtnCancelSearch_OnClick(object sender, RoutedEventArgs e)
+    private async void BtnCancelSearch_OnClick(object sender, RoutedEventArgs e)
     {
-        _cts?.Cancel();
+        await _cts.CancelAsync();
+
         _isSearching = false;
         
         _viewModel.StartTextSearchingButton = Visibility.Visible;
