@@ -1,7 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using PdfManagerApp.Data;
 using PdfManagerApp.Domain.Entities;
 using PdfManagerApp.Models;
 
@@ -45,6 +44,11 @@ public class SettingsWindowViewModel : SettingsWindowModel, INotifyPropertyChang
     {
         get => _folders;
         set => SetField(ref _folders, value);
+    }
+
+    public int TotalPdfCount()
+    {
+        return Folders.SelectMany(x => x.BookDetails).Count();
     }
 
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
