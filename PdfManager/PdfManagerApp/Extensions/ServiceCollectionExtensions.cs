@@ -10,6 +10,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton<MainWindow>();
         services.AddScoped<SettingsWindow>();
+        services.AddScoped<HistorySearchWindow>();
 
         return services;
     }
@@ -18,6 +19,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton<MainWindowViewModel>();
         services.AddSingleton<SettingsWindowViewModel>();
+        services.AddScoped<HistorySearchViewModel>();
 
         return services;
     }

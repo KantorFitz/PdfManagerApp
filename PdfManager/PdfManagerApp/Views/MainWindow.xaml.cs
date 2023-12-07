@@ -8,6 +8,7 @@ using CsvHelper.Configuration;
 using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using PdfManagerApp.Data;
 using PdfManagerApp.Domain.Entities;
 using PdfManagerApp.Helpers;
@@ -77,7 +78,7 @@ public partial class MainWindow : Window
         _searchLog = new SearchLog
         {
             CreatedAt = DateTime.UtcNow,
-            SeekedPhrasesJsonList = textToSearch,
+            SeekedPhrasesJsonList = JsonConvert.SerializeObject(new List<string>{textToSearch}),
             SearchFinishReason = (int)SearchFinishReason.Unknown
         };
         await _context.SearchLogs.AddAsync(_searchLog);
@@ -238,6 +239,16 @@ public partial class MainWindow : Window
     {
         using var scope = _sp.CreateScope();
         var settingsWindow = scope.ServiceProvider.GetRequiredService<SettingsWindow>();
+
+        settingsWindow.Owner = this;
+
+        settingsWindow.ShowDialog();
+    }
+
+    private void ShowHistorySearchButton_OnClick(object sender, RoutedEventArgs e)
+    {
+        using var scope = _sp.CreateScope();
+        var settingsWindow = scope.ServiceProvider.GetRequiredService<HistorySearchWindow>();
 
         settingsWindow.Owner = this;
 
