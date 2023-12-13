@@ -10,6 +10,7 @@
         Title="SearchHistoryWindow" Height="450" Width="800">
     <Window.Resources>
         <converters:EnumToDescriptionStringConverter x:Key="EnumToDescriptionStringConverter" />
+        <converters:UtcToLocalDateTimeConverter x:Key="UtcToLocalDateTimeConverter" />
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -20,7 +21,7 @@
         <ListBox MinWidth="50" VerticalAlignment="Stretch" ItemsSource="{Binding SearchLogs}" SelectionChanged="Selector_OnSelectionChanged">
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="{x:Type entities:SearchLog}">
-                    <TextBlock Text="{Binding CreatedAt, StringFormat={}{0:dd-MM-yyyy HH:mm}}"></TextBlock>
+                    <TextBlock Text="{Binding CreatedAt, StringFormat={}{0:dd-MM-yyyy HH:mm}, Converter={StaticResource UtcToLocalDateTimeConverter}}"></TextBlock>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
