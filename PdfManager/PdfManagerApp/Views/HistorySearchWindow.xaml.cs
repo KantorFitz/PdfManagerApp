@@ -24,6 +24,7 @@ public partial class HistorySearchWindow : Window
         var searchLog = _viewModel.SelectedSearchLog = e.AddedItems.Cast<SearchLog>().Single();
         
         _viewModel.HistoricalBookDetails = searchLog.HistoricalFolders.SelectMany(x => x.HistoricalBookDetails).ToList();
+
         _viewModel.SeekedPhrasesList = string.Join(", ", (JsonConvert.DeserializeObject<List<string>>(searchLog.SeekedPhrasesJsonList)));
         _viewModel.SearchFinishReason = (SearchFinishReason)searchLog.SearchFinishReason;
         _viewModel.BooksHandled = searchLog.HistoricalFolders.SelectMany(x => x.HistoricalBookDetails).Count();

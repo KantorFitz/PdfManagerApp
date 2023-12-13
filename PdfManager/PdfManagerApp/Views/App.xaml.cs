@@ -14,18 +14,18 @@ namespace PdfManagerApp.Views;
 /// </summary>
 public partial class App : Application
 {
-    private ServiceProvider serviceProvider;
+    private ServiceProvider _serviceProvider;
 
     public App()
     {
-        ServiceCollection services = new ServiceCollection();
+        var services = new ServiceCollection();
         ConfigureServices(services);
-        serviceProvider = services.BuildServiceProvider();
+        _serviceProvider = services.BuildServiceProvider();
 
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
 
-    private void ConfigureServices(ServiceCollection services)
+    private static void ConfigureServices(ServiceCollection services)
     {
         services.AddDbContext<DatabaseContext>();
 
@@ -35,17 +35,14 @@ public partial class App : Application
 
     private void OnStartup(object sender, StartupEventArgs e)
     {
-        Thread.CurrentThread.CurrentCulture = new CultureInfo("pl");
-        Thread.CurrentThread.CurrentUICulture = new CultureInfo("pl");
-
-        var dbContext = serviceProvider.GetRequiredService<DatabaseContext>();
+        var dbContext = _serviceProvider.GetRequiredService<DatabaseContext>();
         dbContext.Database.Migrate();
         dbContext.Folders.Include(x=>x.BookDetails).Load();
 
-        var savedFoldersMv = serviceProvider.GetRequiredService<SettingsWindowViewModel>();
-        savedFoldersMv.Folders = dbContext.Folders.Local.ToObservableCollection();
+        var savedFoldersViewModel = _serviceProvider.GetRequiredService<SettingsWindowViewModel>();
+        savedFoldersViewModel.Folders = dbContext.Folders.Local.ToObservableCollection();
 
-        var mainWindow = serviceProvider.GetRequiredService<MainWindow>();
+        var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
         mainWindow.Show();
     }
 }
