@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Windows.Data;
-using System.ComponentModel;
 using System.Windows;
+using PdfManagerApp.Extensions;
 
 namespace PdfManagerApp.Converters;
 
@@ -9,17 +9,11 @@ public class EnumToDescriptionStringConverter : IValueConverter
 {
     public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
-        var description = value.ToString();
-        var fieldInfo = value.GetType().GetField(value.ToString());
+        if (value == null || (value.GetType() != typeof(Enum) && value.GetType().BaseType != typeof(Enum)))
+            return false;
 
-        if (fieldInfo == null)
-            return description;
-
-        var attrs = fieldInfo.GetCustomAttributes(typeof(DescriptionAttribute), true);
-        if (attrs is { Length: > 0 })
-            description = ((DescriptionAttribute)attrs[0]).Description;
-
-        return description;
+        var enumInstance = (Enum)value;
+        return enumInstance.GetDescription();
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
