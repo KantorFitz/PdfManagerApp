@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Globalization;
 using System.Windows;
 using FluentAssertions;
@@ -22,7 +23,7 @@ public class EnumToDescriptionStringConverterTest
     private readonly EnumToDescriptionStringConverter _converter = new();
 
     [Fact]
-    public void Convert_WithDescription_ShouldReturnDescription()
+    public void Convert_ShouldReturnDescription_WhenEnumWithDescriptionIsGiven()
     {
         // arrange
         var testEnum = TestEnum.One;
@@ -35,7 +36,7 @@ public class EnumToDescriptionStringConverterTest
     }
 
     [Fact]
-    public void Convert_WithoutDescription_ShouldReturnEnumName()
+    public void Convert_ShouldReturnEnumName_WhenEnumWithoutDescriptionIsGiven()
     {
         // arrange
         var testEnum = TestEnum.Two;
@@ -44,11 +45,11 @@ public class EnumToDescriptionStringConverterTest
         var result = _converter.Convert(testEnum, null, null, CultureInfo.InvariantCulture);
 
         // assert
-        result.Should().Be("Two");
+        result.Should().Be(Enum.GetName(testEnum));
     }
 
     [Fact]
-    public void Convert_NullObject_ShouldReturnEmptyString()
+    public void Convert_ShouldReturnFalse_WhenNullObjectIsGiven()
     {
         object testObject = null;
 
@@ -56,11 +57,11 @@ public class EnumToDescriptionStringConverterTest
         var result = _converter.Convert(testObject, typeof(string), null, CultureInfo.InvariantCulture);
 
         // assert
-        result.Should().Be("");
+        result.Should().Be(false);
     }
 
     [Fact]
-    public void ConvertBack_ShouldAlwaysReturnUnset()
+    public void ConvertBack_ShouldReturnUnset_Always()
     {
         object testObject = "test";
 
