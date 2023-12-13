@@ -35,7 +35,11 @@ public class HistorySearchViewModel(DatabaseContext context) : HistorySearchWind
     {
         get
         {
-            context.SearchLogs.Load();
+            context.SearchLogs
+                .Include(x => x.HistoricalFolders)
+                .ThenInclude(x => x.HistoricalBookDetails)
+                .ThenInclude(x => x.SearchResults.OrderBy(y => y.FoundOnPage))
+                .Load();
 
             return context.SearchLogs.Local.ToObservableCollection();
         }
