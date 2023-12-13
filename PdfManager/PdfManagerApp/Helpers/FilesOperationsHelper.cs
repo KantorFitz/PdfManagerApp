@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using iTextSharp.text.pdf;
 using Microsoft.Win32;
 using PdfManagerApp.Domain.Entities;
 using PdfDocument = UglyToad.PdfPig.PdfDocument;

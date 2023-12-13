@@ -1,15 +1,22 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Windows;
-using PdfManagerApp.Data;
-using PdfManagerApp.Models;
+using PdfManagerApp.ViewModels.Business.Models;
 
 namespace PdfManagerApp.ViewModels;
 
-public class MainWindowViewModel : MainWindowModel, INotifyPropertyChanged
+public class MainWindowViewModel : INotifyPropertyChanged
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
+    private string _chosenFolderPath = "Aktualna ścieżka";
+    private int _currentFileCompleted;
+    private int _currentFileCompletedMaximum = 1;
+    private string _currentFileWorkLabel = "Current file";
+    private int _filesCompleted;
+    private int _filesCompletedMaximum = 1;
+    private ObservableCollection<TextOccurenceModel> _foundOccurrences = new();
+    private bool _isStartTextSearchingButtonVisible;
+    private string _pdfAmountValue = "...";
+    private string _searchText;
 
     public ObservableCollection<TextOccurenceModel> FoundOccurrences
     {
@@ -17,10 +24,10 @@ public class MainWindowViewModel : MainWindowModel, INotifyPropertyChanged
         set => SetField(ref _foundOccurrences, value);
     }
 
-    public Visibility StartTextSearchingButton
+    public bool IsStartTextSearchingButtonVisible // TODO[2023-12-13 13:42:44]: Add bool to visibility converter
     {
-        get => _startTextSearchingButton;
-        set => SetField(ref _startTextSearchingButton, value);
+        get => _isStartTextSearchingButtonVisible;
+        set => SetField(ref _isStartTextSearchingButtonVisible, value);
     }
 
     public int FilesCompletedMaximum
@@ -70,6 +77,8 @@ public class MainWindowViewModel : MainWindowModel, INotifyPropertyChanged
         get => _currentFileWorkLabel;
         set => SetField(ref _currentFileWorkLabel, value);
     }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {

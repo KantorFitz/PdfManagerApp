@@ -9,11 +9,12 @@ using iTextSharp.text.pdf;
 using iTextSharp.text.pdf.parser;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using PdfManagerApp.Data;
 using PdfManagerApp.Domain.Entities;
 using PdfManagerApp.Helpers;
 using PdfManagerApp.Infrastructure;
 using PdfManagerApp.ViewModels;
+using PdfManagerApp.ViewModels.Business.Enums;
+using PdfManagerApp.ViewModels.Business.Models;
 using Path = System.IO.Path;
 
 namespace PdfManagerApp.Views;
@@ -63,7 +64,7 @@ public partial class MainWindow : Window
         if (_isSearching)
             return;
 
-        _viewModel.StartTextSearchingButton = Visibility.Hidden;
+        _viewModel.IsStartTextSearchingButtonVisible = false;
 
         _cts?.Dispose();
         _cts = new();
@@ -128,7 +129,7 @@ public partial class MainWindow : Window
 
             await _context.SaveChangesAsync();
             _isSearching = false;
-            _viewModel.StartTextSearchingButton = Visibility.Visible;
+            _viewModel.IsStartTextSearchingButtonVisible = true;
         }
     }
 
@@ -201,7 +202,7 @@ public partial class MainWindow : Window
 
         _isSearching = false;
         
-        _viewModel.StartTextSearchingButton = Visibility.Visible;
+        _viewModel.IsStartTextSearchingButtonVisible = true;
     }
 
     private void BtnExportToCsv_OnClick(object sender, RoutedEventArgs e)

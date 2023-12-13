@@ -1,11 +1,11 @@
 ﻿using CsvHelper.Configuration;
 
-namespace PdfManagerApp.Data;
+namespace PdfManagerApp.ViewModels.Business.Models;
 
 public class TextOccurenceModel
 {
     public string BookName { get; set; }
-    public string Sentence { get; set; }   
+    public string Sentence { get; set; }
     public int FoundOnPage { get; set; }
 }
 

@@ -2,13 +2,18 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using PdfManagerApp.Domain.Entities;
-using PdfManagerApp.Models;
 
 namespace PdfManagerApp.ViewModels;
 
-public class SettingsWindowViewModel : SettingsWindowModel, INotifyPropertyChanged
+public class SettingsWindowViewModel : INotifyPropertyChanged
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
+    private bool _canPerformFilesSearch = true;
+
+    private string _chosenFolderPath = "Aktualna ścieżka";
+    private ObservableCollection<Folder> _folders = new();
+    private int _foldersScanned;
+    private string _pdfAmountValue = "...";
+    private int _totalFoldersCount = 1;
 
     public bool CanPerformFilesSearch
     {
@@ -45,6 +50,8 @@ public class SettingsWindowViewModel : SettingsWindowModel, INotifyPropertyChang
         get => _folders;
         set => SetField(ref _folders, value);
     }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public int TotalPdfCount()
     {

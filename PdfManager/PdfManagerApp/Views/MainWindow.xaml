@@ -33,7 +33,7 @@
 
                 <TextBox x:Name="SearchText" Text="{Binding SearchText, Mode=TwoWay}" Grid.Column="0" IsEnabled="True" />
                 <Button x:Name="btnCancelSearch" Grid.Column="1" HorizontalAlignment="Stretch" Margin="10 0 0 0" Content="Anuluj wyszukiwanie" Click="BtnCancelSearch_OnClick" />
-                <Button x:Name="btnStartSearch" Grid.Column="1" HorizontalAlignment="Stretch" Margin="10 0 0 0" Content="Wyszukaj tekst" Visibility="{Binding StartTextSearchingButton}" Click="BtnStartSearch_OnClick" />
+                <Button x:Name="btnStartSearch" Grid.Column="1" HorizontalAlignment="Stretch" Margin="10 0 0 0" Content="Wyszukaj tekst" Visibility="{Binding IsStartTextSearchingButtonVisible}" Click="BtnStartSearch_OnClick" />
                 <Button x:Name="btnExportToCsv" Grid.Column="2" HorizontalAlignment="Stretch" Margin="10 0 0 0" Content="Eksport do CSV" Click="BtnExportToCsv_OnClick" />
 
                 <StackPanel Grid.Column="3" Margin="10 0 0 0" HorizontalAlignment="Stretch">

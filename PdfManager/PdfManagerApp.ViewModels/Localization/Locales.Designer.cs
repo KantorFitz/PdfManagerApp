@@ -38,7 +38,7 @@ namespace PdfManagerApp.Localization {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PdfManagerApp.Localization.Locales", typeof(Locales).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("PdfManagerApp.ViewModels.Localization.Locales", typeof(Locales).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

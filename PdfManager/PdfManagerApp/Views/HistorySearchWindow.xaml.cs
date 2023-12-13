@@ -1,9 +1,9 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using Newtonsoft.Json;
-using PdfManagerApp.Data;
 using PdfManagerApp.Domain.Entities;
 using PdfManagerApp.ViewModels;
+using PdfManagerApp.ViewModels.Business.Enums;
 
 namespace PdfManagerApp.Views;
 

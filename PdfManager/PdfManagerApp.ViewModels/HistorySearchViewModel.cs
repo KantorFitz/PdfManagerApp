@@ -2,16 +2,20 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
-using PdfManagerApp.Data;
 using PdfManagerApp.Domain.Entities;
 using PdfManagerApp.Infrastructure;
-using PdfManagerApp.Models;
+using PdfManagerApp.ViewModels.Business.Enums;
 
 namespace PdfManagerApp.ViewModels;
 
-public class HistorySearchViewModel(DatabaseContext context) : HistorySearchWindowModel, INotifyPropertyChanged
+public class HistorySearchViewModel(DatabaseContext context) : INotifyPropertyChanged
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
+    private int _booksHandled;
+
+    private List<HistoricalBookDetail> _historicalBookDetails = new();
+    private SearchFinishReason _searchFinishReason;
+    private string _seekedPhrasesList;
+    private SearchLog _selectedSearchLog;
 
     public SearchLog SelectedSearchLog
     {
@@ -56,6 +60,8 @@ public class HistorySearchViewModel(DatabaseContext context) : HistorySearchWind
         get => _historicalBookDetails;
         set => SetField(ref _historicalBookDetails, value);
     }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
