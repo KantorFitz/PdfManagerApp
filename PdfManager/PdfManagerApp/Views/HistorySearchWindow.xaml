@@ -17,7 +17,7 @@
             <ColumnDefinition Width="5*" />
         </Grid.ColumnDefinitions>
 
-        <ListBox MinWidth="50" VerticalAlignment="Stretch" ItemsSource="{Binding SearchLogs}" Background="Aqua" SelectionChanged="Selector_OnSelectionChanged">
+        <ListBox MinWidth="50" VerticalAlignment="Stretch" ItemsSource="{Binding SearchLogs}" SelectionChanged="Selector_OnSelectionChanged">
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="{x:Type entities:SearchLog}">
                     <TextBlock Text="{Binding CreatedAt, StringFormat={}{0:dd-MM-yyyy HH:mm}}"></TextBlock>
@@ -65,7 +65,7 @@
                         <DataTemplate DataType="{x:Type entities:SearchResult}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="(page " Foreground="Green" />
-                                <TextBlock Text="{Binding FoundOnPage}" />
+                                <TextBlock Text="{Binding FoundOnPage}" Foreground="Green"/>
                                 <TextBlock Text=") " Foreground="Green" />
                                 <TextBlock Text="{Binding Sentence}" />
                             </StackPanel>
