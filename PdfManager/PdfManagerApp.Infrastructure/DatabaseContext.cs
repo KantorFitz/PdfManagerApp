@@ -17,7 +17,7 @@ public class DatabaseContext : DbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseSqlite("Data Source = Configuration.db");
-        optionsBuilder.UseLazyLoadingProxies(); // TODO[2023-12-03 17:01:56]: Consider dropping this if any performance will occur
+        optionsBuilder.UseLazyLoadingProxies(); // TODO[2023-12-03 17:01:56]: Consider dropping this if any performance loss will occur
         base.OnConfiguring(optionsBuilder);
     }
 

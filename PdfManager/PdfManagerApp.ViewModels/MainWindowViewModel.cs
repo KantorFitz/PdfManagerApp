@@ -5,7 +5,7 @@ using PdfManagerApp.ViewModels.Business.Models;
 
 namespace PdfManagerApp.ViewModels;
 
-public class MainWindowViewModel : INotifyPropertyChanged
+public class MainWindowViewModel : BaseViewModel
 {
     private string _chosenFolderPath = "Aktualna ścieżka";
     private int _currentFileCompleted;
@@ -76,19 +76,5 @@ public class MainWindowViewModel : INotifyPropertyChanged
     {
         get => _currentFileWorkLabel;
         set => SetField(ref _currentFileWorkLabel, value);
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-    {
-        field = value;
-        OnPropertyChanged(propertyName);
-        return true;
     }
 }

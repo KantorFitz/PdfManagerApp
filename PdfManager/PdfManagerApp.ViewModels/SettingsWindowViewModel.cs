@@ -5,7 +5,7 @@ using PdfManagerApp.Domain.Entities;
 
 namespace PdfManagerApp.ViewModels;
 
-public class SettingsWindowViewModel : INotifyPropertyChanged
+public class SettingsWindowViewModel : BaseViewModel
 {
     private bool _canPerformFilesSearch = true;
 
@@ -51,23 +51,8 @@ public class SettingsWindowViewModel : INotifyPropertyChanged
         set => SetField(ref _folders, value);
     }
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-
     public int TotalPdfCount()
     {
         return Folders.SelectMany(x => x.BookDetails).Count();
-    }
-
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-        field = value;
-        OnPropertyChanged(propertyName);
-        return true;
     }
 }
