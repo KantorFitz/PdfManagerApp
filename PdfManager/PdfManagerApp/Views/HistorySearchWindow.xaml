@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:entities="clr-namespace:PdfManagerApp.Domain.Entities;assembly=PdfManagerApp.Domain"
-        xmlns:converters="clr-namespace:PdfManagerApp.Converters"
+        xmlns:converters="clr-namespace:PdfManagerApp.Converters;assembly=PdfManagerApp.Converters"
         mc:Ignorable="d"
         WindowStartupLocation="CenterOwner"
         Title="SearchHistoryWindow" Height="450" Width="800">

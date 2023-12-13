@@ -1,6 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using PdfManagerApp.ViewModels.Business.Models;
 
 namespace PdfManagerApp.ViewModels;
@@ -14,7 +12,7 @@ public class MainWindowViewModel : BaseViewModel
     private int _filesCompleted;
     private int _filesCompletedMaximum = 1;
     private ObservableCollection<TextOccurenceModel> _foundOccurrences = new();
-    private bool _isStartTextSearchingButtonVisible;
+    private bool _isStartTextSearchingButtonVisible = true;
     private string _pdfAmountValue = "...";
     private string _searchText;
 
@@ -24,7 +22,7 @@ public class MainWindowViewModel : BaseViewModel
         set => SetField(ref _foundOccurrences, value);
     }
 
-    public bool IsStartTextSearchingButtonVisible // TODO[2023-12-13 13:42:44]: Add bool to visibility converter
+    public bool IsStartTextSearchingButtonVisible
     {
         get => _isStartTextSearchingButtonVisible;
         set => SetField(ref _isStartTextSearchingButtonVisible, value);

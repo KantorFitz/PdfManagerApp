@@ -55,6 +55,7 @@
     </ItemGroup>
     
     <ItemGroup>
+      <ProjectReference Include="..\PdfManagerApp.Converters\PdfManagerApp.Converters.csproj" />
       <ProjectReference Include="..\PdfManagerApp.Infrastructure\PdfManagerApp.Infrastructure.csproj" />
       <ProjectReference Include="..\PdfManagerApp.ViewModels\PdfManagerApp.ViewModels.csproj" />
     </ItemGroup>
