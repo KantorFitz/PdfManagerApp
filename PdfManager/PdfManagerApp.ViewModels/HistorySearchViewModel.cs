@@ -38,6 +38,7 @@ public class HistorySearchViewModel(DatabaseContext context) : BaseViewModel
         get
         {
             context.SearchLogs
+                .OrderByDescending(x => x.CreatedAt)
                 .Include(x => x.HistoricalFolders)
                 .ThenInclude(x => x.HistoricalBookDetails)
                 .ThenInclude(x => x.SearchResults.OrderBy(y => y.FoundOnPage))

@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.Globalization;
+﻿using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Windows;
@@ -27,33 +26,39 @@ public partial class MainWindow : Window
     private CancellationTokenSource _cts;
 
     private bool _isSearching;
-    private readonly MainWindowViewModel _viewModel;
+    private MainWindowViewModel _viewModel;
     private readonly SettingsWindowViewModel _settingsWindowViewModel;
     private readonly DatabaseContext _context;
     private readonly IServiceProvider _sp;
     private SearchLog _searchLog;
 
-    public MainWindow(MainWindowViewModel viewModel, SettingsWindowViewModel settingsWindowViewModel, IServiceProvider sp, DatabaseContext context)
+    public MainWindow(SettingsWindowViewModel settingsWindowViewModel, IServiceProvider sp, DatabaseContext context)
     {
         InitializeComponent();
 
-        _viewModel = viewModel;
         _settingsWindowViewModel = settingsWindowViewModel;
         _context = context;
         _sp = sp;
+
+        Loaded += MainWindow_Loaded;
+        Closed += MainWindow_Closed;
+    }
+
+    private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+        _viewModel = new MainWindowViewModel();
+
         DataContext = _viewModel;
     }
 
-    protected override async void OnClosing(CancelEventArgs e)
+    private async void MainWindow_Closed(object? sender, EventArgs e)
     {
-        if (_isSearching)
-        {
-            await _cts.CancelAsync();
-            _searchLog.SearchFinishReason = (int)SearchFinishReason.OperationCancelled;
-            await _context.SaveChangesAsync();
-        }
+        if (!_isSearching)
+            return;
 
-        base.OnClosing(e);
+        await _cts.CancelAsync();
+        _searchLog.SearchFinishReason = (int)SearchFinishReason.OperationCancelled;
+        await _context.SaveChangesAsync();
     }
 
     private async void BtnStartSearch_OnClick(object sender, RoutedEventArgs e)
